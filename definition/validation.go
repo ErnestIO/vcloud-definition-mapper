@@ -23,6 +23,11 @@ const (
 	VCLOUDMAXNAME  = 50
 )
 
+// Item is used when performing common actions on a collection of items from the input definition
+type Item interface {
+	GetName() string
+}
+
 func isNetwork(networks []Network, ip string) bool {
 	for _, network := range networks {
 		if network.Name == ip {
@@ -86,4 +91,43 @@ func validatePort(p, ptype string) error {
 	}
 
 	return nil
+}
+
+func hasDuplicateRouters(collection []Router) bool {
+	var names []string
+	for _, item := range collection {
+		for _, n := range names {
+			if item.Name == n {
+				return true
+			}
+		}
+		names = append(names, item.Name)
+	}
+	return false
+}
+
+func hasDuplicateNetworks(collection []Network) bool {
+	var names []string
+	for _, item := range collection {
+		for _, n := range names {
+			if item.Name == n {
+				return true
+			}
+		}
+		names = append(names, item.Name)
+	}
+	return false
+}
+
+func hasDuplicateInstance(collection []Instance) bool {
+	var names []string
+	for _, item := range collection {
+		for _, n := range names {
+			if item.Name == n {
+				return true
+			}
+		}
+		names = append(names, item.Name)
+	}
+	return false
 }

@@ -4,7 +4,7 @@
 
 package definition
 
-// Payload is the JSON payload received from services-data-microservice
+// Payload is the JSON payload received from service-store
 //
 // It has all the info needed to build the message that is going to be sent
 // to the FSM over NATS.

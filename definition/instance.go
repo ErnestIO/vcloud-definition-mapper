@@ -7,8 +7,11 @@ package definition
 import (
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/r3labs/binary-prefix"
 )
 
 // Instance ...
@@ -24,7 +27,7 @@ type Instance struct {
 }
 
 // Validate : Validates the instance returning true or false if is valid or not
-func (i *Instance) Validate() error {
+func (i *Instance) Validate(network *Network) error {
 	if i.Name == "" {
 		return errors.New("Instance name should not be null")
 	}
@@ -70,5 +73,54 @@ func (i *Instance) Validate() error {
 		return errors.New("Instance network start_ip should not be null")
 	}
 
+	_, err := binaryprefix.GetMB(i.Memory)
+	if err != nil {
+		return errors.New("Invalid memory format")
+	}
+
+	// Validate IP addresses
+	if network != nil {
+		_, nw, err := net.ParseCIDR(network.Subnet)
+		if err != nil {
+			return errors.New("Could not process network")
+		}
+
+		startIP := net.ParseIP(i.Networks.StartIP.String()).To4()
+		ip := i.Networks.StartIP.To4()
+
+		for x := 0; x < i.Count; x++ {
+			if !nw.Contains(ip) {
+				err := errors.New("Instance IP invalid. IP must be a valid IP in the same range as it's network")
+				return err
+			}
+
+			// Check IP is greater than Start IP (Bounds checking)
+			if ip[3] < startIP[3] {
+				err := errors.New("Instance IP invalid. Allocated IP is lower than Start IP")
+				return err
+			}
+
+			ip[3]++
+		}
+	}
+
 	return nil
+}
+
+// Catalog ...
+func (i *Instance) Catalog() string {
+	parts := strings.Split(i.Image, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+	return parts[0]
+}
+
+// Template ...
+func (i *Instance) Template() string {
+	parts := strings.Split(i.Image, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+	return parts[1]
 }

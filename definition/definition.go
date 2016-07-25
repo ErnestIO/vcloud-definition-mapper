@@ -7,6 +7,7 @@ package definition
 import (
 	"encoding/json"
 	"errors"
+	"net"
 	"unicode/utf8"
 )
 
@@ -62,6 +63,16 @@ func (d *Definition) validateDatacenter() error {
 	return nil
 }
 
+func (d *Definition) validateServiceIP() error {
+	if d.ServiceIP == "" {
+		return nil
+	}
+	if ok := net.ParseIP(d.ServiceIP); ok == nil {
+		return errors.New("ServiceIP is not a valid IP")
+	}
+	return nil
+}
+
 // IsSaltBootstrapped : Return a boolean describing if bootstrapping option is salt
 func (d *Definition) IsSaltBootstrapped() bool {
 	if d.Bootstrapping == "salt" {
@@ -78,6 +89,11 @@ func (d *Definition) Validate() error {
 		return err
 	}
 
+	err = d.validateServiceIP()
+	if err != nil {
+		return err
+	}
+
 	// Validate Datacenter
 	err = d.validateDatacenter()
 	if err != nil {
@@ -86,19 +102,50 @@ func (d *Definition) Validate() error {
 
 	// Validate Instances
 	for _, i := range d.Instances {
-		err := i.Validate()
+		nw := d.FindNetwork(i.Networks.Name)
+
+		err := i.Validate(nw)
 		if err != nil {
 			return err
 		}
 	}
 
+	if hasDuplicateInstance(d.Instances) {
+		return errors.New("Duplicate instance names found")
+	}
+
 	// Validate Routers
+	if hasDuplicateRouters(d.Routers) {
+		return errors.New("Duplicate router names found")
+	}
+
 	for _, r := range d.Routers {
 		err := r.Validate()
 		if err != nil {
 			return err
 		}
+
+		if hasDuplicateNetworks(r.Networks) {
+			return errors.New("Duplicate network names found")
+		}
 	}
 
+	return nil
+}
+
+// GeneratedName returns the generated service name
+func (d *Definition) GeneratedName() string {
+	return d.Datacenter + "-" + d.Name + "-"
+}
+
+// FindNetwork returns a network matched by name
+func (d *Definition) FindNetwork(name string) *Network {
+	for _, router := range d.Routers {
+		for _, network := range router.Networks {
+			if network.Name == name {
+				return &network
+			}
+		}
+	}
 	return nil
 }

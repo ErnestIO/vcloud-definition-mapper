@@ -4,6 +4,7 @@
 
 package definition
 
+// Router stores all information about the router and its componenets
 type Router struct {
 	Name           string           `json:"name"`
 	Networks       []Network        `json:"networks"`
