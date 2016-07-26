@@ -14,12 +14,13 @@ import (
 func TestInstanceValidate(t *testing.T) {
 
 	Convey("Given an instance", t, func() {
-		n := InstanceNetworks{Name: "test", StartIP: net.ParseIP("127.0.0.1")}
-		i := Instance{Name: "test", Image: "test/test", Cpus: 2, Memory: "2GB", Count: 1, Networks: n}
+		n := &Network{Name: "test", Subnet: "127.0.0.0/24"}
+		nw := InstanceNetworks{Name: "test", StartIP: net.ParseIP("127.0.0.1")}
+		i := Instance{Name: "test", Image: "test/test", Cpus: 2, Memory: "2GB", Count: 1, Networks: nw}
 		Convey("With an invalid name", func() {
 			i.Name = ""
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance name should not be null")
@@ -30,7 +31,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With a name > 50 chars", func() {
 			i.Name = "aksjhdlkashdliuhliusncldiudnalsundlaiunsdliausndliuansdlksbdlas"
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance name can't be greater than 50 characters")
@@ -41,7 +42,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an invalid image name", func() {
 			i.Image = ""
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance image should not be null")
@@ -52,7 +53,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an invalid image format", func() {
 			i.Image = "aksjhdlkashdliuhliusncldiud"
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance image invalid, use format <catalog>/<image>")
@@ -63,7 +64,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an empty image catalog", func() {
 			i.Image = "/image"
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance image catalog should not be null, use format <catalog>/<image>")
@@ -74,7 +75,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an empty image", func() {
 			i.Image = "catalog/"
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance image image should not be null, use format <catalog>/<image>")
@@ -85,7 +86,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With a cpu field less than one", func() {
 			i.Cpus = 0
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance cpus should not be < 1")
@@ -96,7 +97,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an empty memory field", func() {
 			i.Memory = ""
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance memory should not be null")
@@ -107,7 +108,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an instance count less than one", func() {
 			i.Count = 0
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance count should not be < 1")
@@ -118,7 +119,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an invalid networks name", func() {
 			i.Networks.Name = ""
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance network name should not be null")
@@ -129,7 +130,7 @@ func TestInstanceValidate(t *testing.T) {
 		Convey("With an invalid start ip", func() {
 			i.Networks.StartIP = nil
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldNotBeNil)
 					So(err.Error(), ShouldEqual, "Instance network start_ip should not be null")
@@ -139,7 +140,7 @@ func TestInstanceValidate(t *testing.T) {
 
 		Convey("With valid entries", func() {
 			Convey("When validating the instance", func() {
-				err := i.Validate()
+				err := i.Validate(n)
 				Convey("Then should return an error", func() {
 					So(err, ShouldBeNil)
 				})

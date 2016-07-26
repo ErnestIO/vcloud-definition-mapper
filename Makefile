@@ -13,6 +13,8 @@ test:
 
 deps: dev-deps
 	go get -u github.com/nats-io/nats
+	go get -u github.com/r3labs/binary-prefix
+	go get -u github.com/r3labs/workflow
 
 dev-deps:
 	go get -u github.com/golang/lint/golint

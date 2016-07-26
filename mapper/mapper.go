@@ -31,7 +31,7 @@ func ConvertPayload(p definition.Payload) *output.FSMMessage {
 	// Bootstraps cannot be generated here as they are dependent on instance to create
 
 	// Map executions
-	m.Executions.Items = MapExecutions(d)
+	m.Executions.Items = MapExecutions(p.Service)
 
 	return &m
 }

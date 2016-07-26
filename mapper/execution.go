@@ -15,6 +15,8 @@ import (
 
 // MapExecutions : Generates the given executions to a valid internal executions
 func MapExecutions(d definition.Definition) []output.Execution {
+	var execs []output.Execution
+
 	for _, instance := range d.Instances {
 		// Instance Name prefix
 		prefix := d.GeneratedName() + instance.Name
@@ -25,7 +27,7 @@ func MapExecutions(d definition.Definition) []output.Execution {
 			execs = append(execs, output.Execution{
 				Name:    fmt.Sprintf("Execution %s %s", instance.Name, strconv.Itoa(i+1)),
 				Type:    "salt",
-				Target:  constructTarget(d.Instances, prefix),
+				Target:  constructTarget(prefix, instance.Count),
 				Payload: strings.Join(e.Commands, "; "),
 				Prefix:  prefix,
 			})
@@ -38,16 +40,6 @@ func constructTarget(prefix string, count int) string {
 	var targets []string
 	for i := 0; i < count; i++ {
 		targets = append(targets, prefix+"-"+strconv.Itoa(i+1))
-	}
-	nodes := strings.Join(targets, ",")
-	return fmt.Sprintf("list:%s", nodes)
-}
-
-// ConstructInstanceTargets generates a valid salt target from a list of instances
-func ConstructInstanceTargets(instances []output.Instance) string {
-	var targets []string
-	for _, instance := range instances {
-		targets = append(targets, instance.Name)
 	}
 	nodes := strings.Join(targets, ",")
 	return fmt.Sprintf("list:%s", nodes)

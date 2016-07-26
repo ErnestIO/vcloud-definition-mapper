@@ -32,11 +32,11 @@ func MapInstances(d definition.Definition) []output.Instance {
 
 	for _, instance := range d.Instances {
 		ip := instance.Networks.StartIP.To4()
-		memory, _ = binaryprefix.GetMB(instance.Memory)
+		memory, _ := binaryprefix.GetMB(instance.Memory)
 
 		for i := 0; i < instance.Count; i++ {
 			newInstance := output.Instance{
-				Name:        d.GeneratedName() + instance.Name + "-" + strconv.Itoa(index+1),
+				Name:        d.GeneratedName() + instance.Name + "-" + strconv.Itoa(i+1),
 				Catalog:     instance.Catalog(),
 				Image:       instance.Template(),
 				Cpus:        instance.Cpus,
@@ -52,7 +52,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 			ip[3]++
 		}
 	}
-	return instances, err
+	return instances
 }
 
 // MapInstanceDisks : Maps the instances disks

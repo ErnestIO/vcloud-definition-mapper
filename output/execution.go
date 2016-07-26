@@ -4,7 +4,11 @@
 
 package output
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
 
 // Execution ...
 type Execution struct {
@@ -28,4 +32,14 @@ func (e *Execution) TargetHasChanged(oe *Execution) bool {
 // PayloadHasChanged returns true if the execution's payload has changed
 func (e *Execution) PayloadHasChanged(oe *Execution) bool {
 	return e.Payload == oe.Payload
+}
+
+// RebuildTarget generates a valid salt target from a list of instances
+func (e *Execution) RebuildTarget(instances []Instance) string {
+	var targets []string
+	for _, instance := range instances {
+		targets = append(targets, instance.Name)
+	}
+	nodes := strings.Join(targets, ",")
+	return fmt.Sprintf("list:%s", nodes)
 }
