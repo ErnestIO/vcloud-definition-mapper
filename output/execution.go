@@ -12,9 +12,20 @@ type Execution struct {
 	Type    string `json:"type"`
 	Target  string `json:"target"`
 	Payload string `json:"payload"`
+	Prefix  string `json:"-"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (e *Execution) HasChanged(oe *Execution) bool {
 	return !reflect.DeepEqual(*e, *oe)
+}
+
+// TargetHasChanged returns true if the execution's target has changed
+func (e *Execution) TargetHasChanged(oe *Execution) bool {
+	return e.Target == oe.Target
+}
+
+// PayloadHasChanged returns true if the execution's payload has changed
+func (e *Execution) PayloadHasChanged(oe *Execution) bool {
+	return e.Payload == oe.Payload
 }

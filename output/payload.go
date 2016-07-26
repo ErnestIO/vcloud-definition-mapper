@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/r3labs/vcloud-definition-mapper/mapper"
 	"github.com/r3labs/workflow"
 )
 
@@ -216,7 +217,24 @@ func (m *FSMMessage) Diff(om *FSMMessage) {
 		}
 	}
 
-	// build new executions
+	if m.Bootstrapping == "salt" {
+		// build new bootstraps
+		m.Bootstraps = mapper.GenerateBootstraps(m.InstancesToCreate)
+		m.ExecutionsToCreate = append(m.ExecutionsToCreate, mapper.GenerateBootstrapCleanups(m.InstancesToDelete))
+
+		// build new executions
+		for _, execution := range m.Executions.Items {
+			oe := om.FindExecution(execution.Name)
+			if oe != nil || execution.PayloadHasChanged(oe) {
+				m.ExecutionsToCreate = append(m.ExecutionsToCreate, execution)
+			} else if execution.TargetHasChanged(oe) {
+				instances = m.FilterNewInstances(execution.Prefix)
+				execution.Target = builder.ConstructInstanceTargets(instances)
+
+				m.ExecutionsToCreate = append(m.ExecutionsToCreate, execution)
+			}
+		}
+	}
 
 }
 
