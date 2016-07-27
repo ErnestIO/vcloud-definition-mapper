@@ -26,7 +26,7 @@ func ConvertPayload(p definition.Payload) *output.FSMMessage {
 	m.Firewalls.Items = MapFirewalls(p.Service)
 
 	// Map nats/port forwarding
-	m.Nats.Items = MapNATS(p.Service, p.Datacenter.ExternalNetwork)
+	m.Nats.Items = MapNats(p.Service, p.Datacenter.ExternalNetwork)
 
 	// Bootstraps cannot be generated here as they are dependent on instance to create
 

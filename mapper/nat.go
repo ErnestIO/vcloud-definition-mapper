@@ -9,9 +9,9 @@ import (
 	"github.com/r3labs/vcloud-definition-mapper/output"
 )
 
-// MapNATS : Generates necessary nats rules for input networks + salt if
+// MapNats : Generates necessary nats rules for input networks + salt if
 // required
-func MapNATS(d definition.Definition, externalNetwork string) []output.Nat {
+func MapNats(d definition.Definition, externalNetwork string) []output.Nat {
 	var nats []output.Nat
 
 	for _, r := range d.Routers {
@@ -21,7 +21,7 @@ func MapNATS(d definition.Definition, externalNetwork string) []output.Nat {
 
 		// Generate Nats
 		n := output.Nat{
-			Name:       d.Name,
+			Name:       d.GeneratedName() + r.Name,
 			RouterName: r.Name,
 			Service:    d.Name,
 		}

@@ -19,7 +19,7 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 		}
 
 		f := output.Firewall{
-			Name:       d.GeneratedName() + "-" + r.Name,
+			Name:       d.GeneratedName() + r.Name,
 			RouterName: r.Name,
 		}
 
