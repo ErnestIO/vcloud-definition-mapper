@@ -5,11 +5,16 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/nats-io/nats"
+	"github.com/r3labs/vcloud-definition-mapper/definition"
+	"github.com/r3labs/vcloud-definition-mapper/mapper"
+	"github.com/r3labs/vcloud-definition-mapper/output"
 )
 
 var nc *nats.Conn
@@ -26,12 +31,101 @@ func main() {
 		log.Fatal(natsErr)
 	}
 
-	nc.Subscribe("definition.map.creation.vcloud", notImplemented)
-	nc.Subscribe("definition.map.deletion.vcloud", notImplemented)
+	nc.Subscribe("definition.map.creation.vcloud", createDefinitionHandler)
+	nc.Subscribe("definition.map.deletion.vcloud", deleteDefinitionHandler)
 
 	runtime.Goexit()
 }
 
-func notImplemented(m *nats.Msg) {
-	nc.Publish(m.Reply, []byte(`{"error":"not implemented"}`))
+func createDefinitionHandler(msg *nats.Msg) {
+	var om output.FSMMessage
+
+	p, err := definition.PayloadFromJSON(msg.Data)
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
+		return
+	}
+
+	err = p.Service.Validate()
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"`+err.Error()+`"}`))
+		return
+	}
+
+	// new fsm message
+	m := mapper.ConvertPayload(p)
+
+	// previous output message if it exists
+	if p.PrevID != "" {
+		om, err = getPreviousService(p.PrevID)
+		if err != nil {
+			nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
+			return
+		}
+	}
+
+	// Check for changes and create workflow arcs
+	m.Diff(om)
+	err = m.GenerateWorkflow("create-workflow.json")
+	if err != nil {
+		log.Println(err.Error())
+		nc.Publish(msg.Reply, []byte(`{"error":"Could not generate workflow."}`))
+		return
+	}
+
+	data, err := json.Marshal(m)
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
+		return
+	}
+
+	nc.Publish(msg.Reply, data)
+}
+
+func deleteDefinitionHandler(msg *nats.Msg) {
+	p, err := definition.PayloadFromJSON(msg.Data)
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
+		return
+	}
+
+	m, err := getPreviousService(p.PrevID)
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
+		return
+	}
+
+	// Assign all items to delete
+	m.RoutersToDelete = m.Routers
+	m.NetworksToDelete = m.Networks
+	m.InstancesToDelete = m.Instances
+	m.FirewallsToDelete = m.Firewalls
+	m.NatsToDelete = m.Nats
+
+	// Generate delete workflow
+	m.GenerateWorkflow("delete-workflow.json")
+
+	data, err := json.Marshal(m)
+	if err != nil {
+		nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
+		return
+	}
+
+	nc.Publish(msg.Reply, data)
+}
+
+func getPreviousService(id string) (output.FSMMessage, error) {
+	var payload output.FSMMessage
+
+	msg, err := nc.Request("service.get.mapping", []byte(`{"id":"`+id+`"}`), time.Second)
+	if err != nil {
+		log.Println(err.Error())
+		return payload, err
+	}
+
+	if err := json.Unmarshal(msg.Data, &payload); err != nil {
+		return payload, err
+	}
+
+	return payload, nil
 }

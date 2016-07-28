@@ -10,8 +10,15 @@ import (
 )
 
 // ConvertPayload will build an FSMMessage based on an input definition
-func ConvertPayload(p definition.Payload) *output.FSMMessage {
-	var m output.FSMMessage
+func ConvertPayload(p *definition.Payload) *output.FSMMessage {
+	m := output.FSMMessage{
+		ID:            p.ServiceID,
+		Service:       p.ServiceID,
+		ServiceName:   p.Service.Name,
+		ClientName:    p.Client.Name,
+		Type:          p.Datacenter.Type,
+		Bootstrapping: p.Service.Bootstrapping,
+	}
 
 	// Map routers
 	m.Routers.Items = MapRouters(p.Service, p.Datacenter.Type)

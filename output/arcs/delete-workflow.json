@@ -1,0 +1,14 @@
+{
+  "arcs": [
+    { "from": "created", "to": "started",  "event": "service.delete" },
+    { "from": "started", "to": "deleting_instances",  "event": "instances.delete" },
+    { "from": "deleting_instances", "to": "instances_deleted",  "event": "instances.delete.done" },
+    { "from": "instances_deleted", "to": "deleting_networks",  "event": "networks.delete" },
+    { "from": "deleting_networks", "to": "networks_deleted",  "event": "networks.delete.done" },
+    { "from": "networks_deleted", "to": "deleting_routers",  "event": "routers.delete" },
+    { "from": "deleting_routers", "to": "routers_deleted",  "event": "routers.delete.done" },
+    { "from": "routers_deleted", "to": "done", "event": "service.delete.done"},
+    { "from": "pre-failed", "to": "failed", "event": "to_error"},
+    { "from": "failed", "to": "errored", "event": "service.delete.error"}
+  ]
+}

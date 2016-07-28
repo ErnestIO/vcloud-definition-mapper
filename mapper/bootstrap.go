@@ -7,7 +7,7 @@ package mapper
 import (
 	"fmt"
 
-	"github.com/ernestio/definition-mapper/output"
+	"github.com/r3labs/vcloud-definition-mapper/output"
 )
 
 // GenerateBootstraps : generates necessary bootstraps for instances

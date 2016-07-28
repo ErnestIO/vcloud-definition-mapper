@@ -8,30 +8,33 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/r3labs/graph"
 	"github.com/r3labs/workflow"
 )
 
 // FSMMessage is the JSON payload that will be sent to the FSM to create a
 // service.
 type FSMMessage struct {
-	ID            string            `json:"id"`
-	Body          string            `json:"body"`
-	Endpoint      string            `json:"endpoint"`
-	Service       string            `json:"service"`
-	Bootstrapping string            `json:"bootstrapping"`
-	ErnestIP      []string          `json:"ernest_ip"`
-	ServiceIP     string            `json:"service_ip"`
-	Parent        string            `json:"existing_service"`
-	Workflow      workflow.Workflow `json:"workflow"`
-	ServiceName   string            `json:"name"`
-	Client        string            `json:"client"` // TODO: Use client or client_id not both!
-	ClientID      string            `json:"client_id"`
-	ClientName    string            `json:"client_name"`
-	Started       string            `json:"started"`
-	Finished      string            `json:"finished"`
-	Status        string            `json:"status"`
-	Type          string            `json:"type"`
-	Datacenters   struct {
+	ID            string   `json:"id"`
+	Body          string   `json:"body"`
+	Endpoint      string   `json:"endpoint"`
+	Service       string   `json:"service"`
+	Bootstrapping string   `json:"bootstrapping"`
+	ErnestIP      []string `json:"ernest_ip"`
+	ServiceIP     string   `json:"service_ip"`
+	Parent        string   `json:"existing_service"`
+	Workflow      struct {
+		Arcs []graph.Edge `json:"arcs"`
+	} `json:"workflow"`
+	ServiceName string `json:"name"`
+	Client      string `json:"client"` // TODO: Use client or client_id not both!
+	ClientID    string `json:"client_id"`
+	ClientName  string `json:"client_name"`
+	Started     string `json:"started"`
+	Finished    string `json:"finished"`
+	Status      string `json:"status"`
+	Type        string `json:"type"`
+	Datacenters struct {
 		Started  string       `json:"started"`
 		Finished string       `json:"finished"`
 		Status   string       `json:"status"`
@@ -114,7 +117,7 @@ type FSMMessage struct {
 		Finished string     `json:"finished"`
 		Status   string     `json:"status"`
 		Items    []Firewall `json:"items"`
-	} `json:"firewalls_to_create"`
+	} `json:"firewalls_to_update"`
 	FirewallsToDelete struct {
 		Started  string     `json:"started"`
 		Finished string     `json:"finished"`
@@ -138,7 +141,7 @@ type FSMMessage struct {
 		Finished string `json:"finished"`
 		Status   string `json:"status"`
 		Items    []Nat  `json:"items"`
-	} `json:"nats_to_create"`
+	} `json:"nats_to_update"`
 	NatsToDelete struct {
 		Started  string `json:"started"`
 		Finished string `json:"finished"`
@@ -166,7 +169,7 @@ type FSMMessage struct {
 }
 
 // Diff compares against an existing FSMMessage from a previous fsm message
-func (m *FSMMessage) Diff(om *FSMMessage) {
+func (m *FSMMessage) Diff(om FSMMessage) {
 	// build new routers
 	for _, router := range m.Routers.Items {
 		if om.FindRouter(router.Name) == nil {
@@ -234,6 +237,66 @@ func (m *FSMMessage) Diff(om *FSMMessage) {
 		}
 	}
 
+}
+
+// GenerateWorkflow creates a fsm workflow based upon actionable tasks, such as creation or deletion of an entity.
+func (m *FSMMessage) GenerateWorkflow(path string) error {
+	w := workflow.New()
+	err := w.LoadFile("./output/arcs/" + path)
+	if err != nil {
+		return err
+	}
+
+	// Set router items
+	w.SetCount("creating_routers", len(m.RoutersToCreate.Items))
+	w.SetCount("routers_created", len(m.RoutersToCreate.Items))
+	w.SetCount("deleting_routers", len(m.RoutersToDelete.Items))
+	w.SetCount("routers_deleted", len(m.RoutersToDelete.Items))
+
+	// Set network items
+	w.SetCount("creating_networks", len(m.NetworksToCreate.Items))
+	w.SetCount("networks_created", len(m.NetworksToCreate.Items))
+	w.SetCount("deleting_networks", len(m.NetworksToDelete.Items))
+	w.SetCount("networks_deleted", len(m.NetworksToDelete.Items))
+
+	// Set instance items
+	w.SetCount("creating_instances", len(m.InstancesToCreate.Items))
+	w.SetCount("instances_created", len(m.InstancesToCreate.Items))
+	w.SetCount("updating_instances", len(m.InstancesToUpdate.Items))
+	w.SetCount("instances_updated", len(m.InstancesToUpdate.Items))
+	w.SetCount("deleting_instances", len(m.InstancesToDelete.Items))
+	w.SetCount("instances_deleted", len(m.InstancesToDelete.Items))
+
+	// Set firewall items
+	w.SetCount("creating_firewalls", len(m.FirewallsToCreate.Items))
+	w.SetCount("firewalls_created", len(m.FirewallsToCreate.Items))
+	w.SetCount("updating_firewalls", len(m.FirewallsToUpdate.Items))
+	w.SetCount("firewalls_updated", len(m.FirewallsToUpdate.Items))
+	w.SetCount("deleting_firewalls", len(m.FirewallsToDelete.Items))
+	w.SetCount("firewalls_deleted", len(m.FirewallsToDelete.Items))
+
+	// Set nat items
+	w.SetCount("creating_nats", len(m.NatsToCreate.Items))
+	w.SetCount("nats_created", len(m.NatsToCreate.Items))
+	w.SetCount("updating_nats", len(m.NatsToUpdate.Items))
+	w.SetCount("nats_updated", len(m.NatsToUpdate.Items))
+	w.SetCount("deleting_nats", len(m.NatsToDelete.Items))
+	w.SetCount("nats_deleted", len(m.NatsToDelete.Items))
+
+	// Set bootstrap items
+	w.SetCount("creating_bootstraps", len(m.Bootstraps.Items))
+	w.SetCount("bootstraps_created", len(m.Bootstraps.Items))
+
+	// Set execution items
+	w.SetCount("creating_executions", len(m.ExecutionsToCreate.Items))
+	w.SetCount("executions_created", len(m.ExecutionsToCreate.Items))
+
+	// Optimize the graph, removing unused arcs/verticies
+	w.Optimize()
+
+	m.Workflow.Arcs = w.Arcs()
+
+	return nil
 }
 
 // FindRouter returns true if a router with a given name exists

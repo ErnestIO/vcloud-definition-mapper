@@ -4,6 +4,8 @@
 
 package definition
 
+import "encoding/json"
+
 // Payload is the JSON payload received from service-store
 //
 // It has all the info needed to build the message that is going to be sent
@@ -14,4 +16,16 @@ type Payload struct {
 	Datacenter Datacenter `json:"datacenter"`
 	Client     Client     `json:"client"`
 	Service    Definition `json:"service"`
+}
+
+// PayloadFromJSON returns a definition payload from json
+func PayloadFromJSON(data []byte) (*Payload, error) {
+	var p Payload
+
+	err := json.Unmarshal(data, &p)
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
 }
