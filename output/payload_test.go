@@ -39,7 +39,7 @@ func TestPayloadDiff(t *testing.T) {
 		Convey("When diffing a fsm message ", func() {
 			Convey("And there is no previous result", func() {
 				var p FSMMessage
-				m.Diff(&p)
+				m.Diff(p)
 				Convey("Then instances to create should be populated", func() {
 					So(len(m.InstancesToCreate.Items), ShouldEqual, 2)
 					So(m.InstancesToCreate.Items[0].Name, ShouldEqual, "test-1")
@@ -62,7 +62,7 @@ func TestPayloadDiff(t *testing.T) {
 				var p FSMMessage
 				p.Instances.Items = testBuildInstances(1)
 
-				m.Diff(&p)
+				m.Diff(p)
 				Convey("Then instances to create should be populated with the new instance", func() {
 					So(len(m.InstancesToCreate.Items), ShouldEqual, 1)
 					So(m.InstancesToCreate.Items[0].Name, ShouldEqual, "test-2")
@@ -79,7 +79,7 @@ func TestPayloadDiff(t *testing.T) {
 				p.Instances.Items = testBuildInstances(2)
 				m.Instances.Items = testBuildInstances(1)
 
-				m.Diff(&p)
+				m.Diff(p)
 				Convey("Then instances to delete should be populated with the old instance", func() {
 					So(len(m.InstancesToDelete.Items), ShouldEqual, 1)
 					So(m.InstancesToDelete.Items[0].Name, ShouldEqual, "test-2")
@@ -97,7 +97,7 @@ func TestPayloadDiff(t *testing.T) {
 				p.Instances.Items[0].Cpus = 2
 				p.Instances.Items[1].Cpus = 2
 
-				m.Diff(&p)
+				m.Diff(p)
 				Convey("Then instances to update should be populated with the updated instances", func() {
 					So(len(m.InstancesToUpdate.Items), ShouldEqual, 2)
 					So(m.InstancesToUpdate.Items[0].Name, ShouldEqual, "test-1")
