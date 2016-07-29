@@ -20,6 +20,9 @@ func ConvertPayload(p *definition.Payload) *output.FSMMessage {
 		Bootstrapping: p.Service.Bootstrapping,
 	}
 
+	// Map datacenters
+	m.Datacenters.Items = MapDatacenters(p.Datacenter)
+
 	// Map routers
 	m.Routers.Items = MapRouters(p.Service, p.Datacenter.Type)
 

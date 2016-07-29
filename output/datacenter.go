@@ -14,6 +14,8 @@ type Datacenter struct {
 	Region          string `json:"region"`
 	Type            string `json:"type"`
 	ExternalNetwork string `json:"external_network"`
+	Token           string `json:"token"`
+	Secret          string `json:"secret"`
 	VCloudURL       string `json:"vcloud_url"`
 	VseURL          string `json:"vse_url"`
 }
