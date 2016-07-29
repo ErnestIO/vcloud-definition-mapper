@@ -16,7 +16,7 @@ func TestExecutionsMapping(t *testing.T) {
 	Convey("Given a valid input definition", t, func() {
 		d := definition.Definition{
 			Name:       "service",
-			Datacenter: "datacenter",
+			Datacenter: definition.Datacenter{Name: "datacenter"},
 		}
 		r := definition.Router{
 			Name: "test",
