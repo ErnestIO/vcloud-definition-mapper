@@ -10,19 +10,21 @@ import (
 )
 
 // MapDatacenters : Maps input router to an ernest formatted router
-func MapDatacenters(def definition.Definition) (datacenters []output.Datacenter) {
-	d := output.Datacenter{}
+func MapDatacenters(dat definition.Datacenter) []output.Datacenter {
+	var datacenters []output.Datacenter
 
-	d.Name = def.Datacenter.Name
-	d.Username = def.Datacenter.Username
-	d.Password = def.Datacenter.Password
-	d.Region = def.Datacenter.Region
-	d.Type = def.Datacenter.Type
-	d.Token = def.Datacenter.Token
-	d.Secret = def.Datacenter.Secret
-	d.ExternalNetwork = def.Datacenter.ExternalNetwork
-	d.VCloudURL = def.Datacenter.VCloudURL
-	d.VseURL = def.Datacenter.VseURL
+	datacenters = append(datacenters, output.Datacenter{
+		Name:            dat.Name,
+		Username:        dat.Username,
+		Password:        dat.Password,
+		Region:          dat.Region,
+		Type:            dat.Type,
+		Token:           dat.Token,
+		Secret:          dat.Secret,
+		ExternalNetwork: dat.ExternalNetwork,
+		VCloudURL:       dat.VCloudURL,
+		VseURL:          dat.VseURL,
+	})
 
-	return append(datacenters, d)
+	return datacenters
 }

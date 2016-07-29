@@ -21,7 +21,7 @@ func ConvertPayload(p *definition.Payload) *output.FSMMessage {
 	}
 
 	// Map datacenters
-	m.Datacenters.Items = MapDatacenters(p.Service)
+	m.Datacenters.Items = MapDatacenters(p.Datacenter)
 
 	// Map routers
 	m.Routers.Items = MapRouters(p.Service, p.Datacenter.Type)

@@ -227,7 +227,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		// build new executions
 		for _, execution := range m.Executions.Items {
 			oe := om.FindExecution(execution.Name)
-			if oe != nil || execution.PayloadHasChanged(oe) {
+			if oe == nil || execution.PayloadHasChanged(oe) {
 				m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
 			} else if execution.TargetHasChanged(oe) {
 				instances := m.FilterNewInstances(execution.Prefix)
