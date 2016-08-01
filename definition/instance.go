@@ -87,6 +87,7 @@ func (i *Instance) Validate(network *Network) error {
 
 		startIP := net.ParseIP(i.Networks.StartIP.String()).To4()
 		ip := i.Networks.StartIP.To4()
+		last := ip[3]
 
 		for x := 0; x < i.Count; x++ {
 			if !nw.Contains(ip) {
@@ -95,12 +96,12 @@ func (i *Instance) Validate(network *Network) error {
 			}
 
 			// Check IP is greater than Start IP (Bounds checking)
-			if ip[3] < startIP[3] {
+			if last < startIP[3] {
 				err := errors.New("Instance IP invalid. Allocated IP is lower than Start IP")
 				return err
 			}
 
-			ip[3]++
+			last++
 		}
 	}
 
