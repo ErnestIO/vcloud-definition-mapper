@@ -14,7 +14,7 @@ import (
 // Definition ...
 type Definition struct {
 	Name          string     `json:"name"`
-	Datacenter    Datacenter `json:"datacenter"`
+	Datacenter    string     `json:"datacenter"`
 	Bootstrapping string     `json:"bootstrapping"`
 	ErnestIP      []string   `json:"ernest_ip"`
 	ServiceIP     string     `json:"service_ip"`
@@ -57,7 +57,7 @@ func (d *Definition) validateName() error {
 }
 
 func (d *Definition) validateDatacenter() error {
-	if err := d.Datacenter.Validate(); err != nil {
+	if d.Datacenter == "" {
 		return errors.New("Datacenter not specified")
 	}
 	return nil
@@ -135,7 +135,7 @@ func (d *Definition) Validate() error {
 
 // GeneratedName returns the generated service name
 func (d *Definition) GeneratedName() string {
-	return d.Datacenter.Name + "-" + d.Name + "-"
+	return d.Datacenter + "-" + d.Name + "-"
 }
 
 // FindNetwork returns a network matched by name
