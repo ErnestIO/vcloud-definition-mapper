@@ -172,7 +172,7 @@ type FSMMessage struct {
 func (m *FSMMessage) Diff(om FSMMessage) {
 	// build new routers
 	for _, router := range m.Routers.Items {
-		if om.FindRouter(router.Name) == nil {
+		if om.FindRouter(router.Name) == nil && router.IP == "" {
 			m.RoutersToCreate.Items = append(m.RoutersToCreate.Items, router)
 		}
 	}
