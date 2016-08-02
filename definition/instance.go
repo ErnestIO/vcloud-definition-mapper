@@ -90,13 +90,14 @@ func (i *Instance) Validate(network *Network) error {
 		last := ip[3]
 
 		for x := 0; x < i.Count; x++ {
+			ip[3] = last
 			if !nw.Contains(ip) {
 				err := errors.New("Instance IP invalid. IP must be a valid IP in the same range as it's network")
 				return err
 			}
 
 			// Check IP is greater than Start IP (Bounds checking)
-			if last < startIP[3] {
+			if ip[3] < startIP[3] {
 				err := errors.New("Instance IP invalid. Allocated IP is lower than Start IP")
 				return err
 			}
