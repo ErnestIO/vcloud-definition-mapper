@@ -4,8 +4,6 @@
 
 package output
 
-import "reflect"
-
 // Nat ...
 type Nat struct {
 	Name       string    `json:"name"`
@@ -21,10 +19,27 @@ func (n *Nat) HasChanged(on *Nat) bool {
 	}
 
 	for i := 0; i < len(n.Rules); i++ {
-		if reflect.DeepEqual(n.Rules[i], on.Rules[i]) != true {
+		if n.hasChangedIP(n.Rules[i].OriginIP, on.Rules[i].OriginIP) ||
+			n.Rules[i].OriginPort != on.Rules[i].OriginPort ||
+			n.hasChangedIP(n.Rules[i].TranslationIP, on.Rules[i].TranslationIP) ||
+			n.Rules[i].TranslationPort != on.Rules[i].TranslationPort ||
+			n.Rules[i].Protocol != on.Rules[i].Protocol ||
+			n.Rules[i].Type != on.Rules[i].Type {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (n *Nat) hasChangedIP(ip, oip string) bool {
+	// In case the destination ip is empty it won't be empty on the previous
+	// build as it's internally replaced by the endpoint
+	if ip == "" {
+		return false
+	}
+	if ip == oip {
+		return false
+	}
+	return true
 }

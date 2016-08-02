@@ -4,8 +4,6 @@
 
 package output
 
-import "reflect"
-
 // Firewall ...
 type Firewall struct {
 	Name       string         `json:"name"`
@@ -20,10 +18,26 @@ func (f *Firewall) HasChanged(of *Firewall) bool {
 	}
 
 	for i := 0; i < len(f.Rules); i++ {
-		if reflect.DeepEqual(f.Rules[i], of.Rules[i]) != true {
+		if f.hasChangedDestinationIP(f.Rules[i].DestinationIP, of.Rules[i].DestinationIP) ||
+			f.Rules[i].DestinationPort != of.Rules[i].DestinationPort ||
+			f.Rules[i].Protocol != of.Rules[i].Protocol ||
+			f.Rules[i].SourceIP != of.Rules[i].SourceIP ||
+			f.Rules[i].SourcePort != of.Rules[i].SourcePort {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (f *Firewall) hasChangedDestinationIP(n, o string) bool {
+	// In case the destination ip is empty it won't be empty on the previous
+	// build as it's internally replaced by the endpoint
+	if n == "" {
+		return false
+	}
+	if n == o {
+		return false
+	}
+	return true
 }
