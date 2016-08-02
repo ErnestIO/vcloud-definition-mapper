@@ -31,7 +31,8 @@ func MapInstances(d definition.Definition) []output.Instance {
 	}
 
 	for _, instance := range d.Instances {
-		ip := instance.Networks.StartIP.To4()
+		ip := make(net.IP, net.IPv4len)
+		copy(ip, instance.Networks.StartIP.To4())
 		memory, _ := binaryprefix.GetMB(instance.Memory)
 
 		for i := 0; i < instance.Count; i++ {

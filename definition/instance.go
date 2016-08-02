@@ -86,11 +86,10 @@ func (i *Instance) Validate(network *Network) error {
 		}
 
 		startIP := net.ParseIP(i.Networks.StartIP.String()).To4()
-		ip := i.Networks.StartIP.To4()
-		last := ip[3]
+		ip := make(net.IP, net.IPv4len)
+		copy(ip, i.Networks.StartIP.To4())
 
 		for x := 0; x < i.Count; x++ {
-			ip[3] = last
 			if !nw.Contains(ip) {
 				err := errors.New("Instance IP invalid. IP must be a valid IP in the same range as it's network")
 				return err
@@ -102,7 +101,7 @@ func (i *Instance) Validate(network *Network) error {
 				return err
 			}
 
-			last++
+			ip[3]++
 		}
 	}
 
