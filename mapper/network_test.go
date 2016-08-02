@@ -15,7 +15,7 @@ func TestNetworksMapping(t *testing.T) {
 	Convey("Given a valid input definition", t, func() {
 		d := definition.Definition{
 			Name:       "test",
-			Datacenter: definition.Datacenter{Name: "datacenter"},
+			Datacenter: "datacenter",
 		}
 		r := definition.Router{
 			Name: "test",

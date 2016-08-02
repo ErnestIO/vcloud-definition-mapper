@@ -17,7 +17,7 @@ func TestMapNats(t *testing.T) {
 	Convey("Given a valid input definition", t, func() {
 		d := definition.Definition{
 			Name:       "service",
-			Datacenter: definition.Datacenter{Name: "datacenter"},
+			Datacenter: "datacenter",
 		}
 
 		r := definition.Router{
