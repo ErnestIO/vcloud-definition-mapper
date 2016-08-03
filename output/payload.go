@@ -171,9 +171,12 @@ type FSMMessage struct {
 // Diff compares against an existing FSMMessage from a previous fsm message
 func (m *FSMMessage) Diff(om FSMMessage) {
 	// build new routers
-	for _, router := range m.Routers.Items {
-		if om.FindRouter(router.Name) == nil && router.IP == "" {
+	for i, router := range m.Routers.Items {
+		r := om.FindRouter(router.Name)
+		if r == nil && router.IP == "" {
 			m.RoutersToCreate.Items = append(m.RoutersToCreate.Items, router)
+		} else if r != nil {
+			m.Routers.Items[i] = *r
 		}
 	}
 
@@ -284,12 +287,12 @@ func (m *FSMMessage) GenerateWorkflow(path string) error {
 	w.SetCount("nats_deleted", len(m.NatsToDelete.Items))
 
 	// Set bootstrap items
-	w.SetCount("creating_bootstraps", len(m.Bootstraps.Items))
-	w.SetCount("bootstraps_created", len(m.Bootstraps.Items))
+	w.SetCount("bootstrapping", len(m.Bootstraps.Items))
+	w.SetCount("bootstrap_ran", len(m.Bootstraps.Items))
 
 	// Set execution items
-	w.SetCount("creating_executions", len(m.ExecutionsToCreate.Items))
-	w.SetCount("executions_created", len(m.ExecutionsToCreate.Items))
+	w.SetCount("running_executions", len(m.ExecutionsToCreate.Items))
+	w.SetCount("executions_ran", len(m.ExecutionsToCreate.Items))
 
 	// Optimize the graph, removing unused arcs/verticies
 	w.Optimize()
