@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"time"
 
+	ecc "github.com/ernestio/ernest-config-client"
 	"github.com/nats-io/nats"
 	"github.com/r3labs/vcloud-definition-mapper/definition"
 	"github.com/r3labs/vcloud-definition-mapper/mapper"
@@ -21,15 +22,7 @@ var nc *nats.Conn
 var natsErr error
 
 func main() {
-	natsURI := os.Getenv("NATS_URI")
-	if natsURI == "" {
-		natsURI = nats.DefaultURL
-	}
-
-	nc, natsErr = nats.Connect(natsURI)
-	if natsErr != nil {
-		log.Fatal(natsErr)
-	}
+	nc = ecc.NewConfig(os.Getenv("NATS_URI")).Nats()
 
 	nc.Subscribe("definition.map.creation.vcloud", createDefinitionHandler)
 	nc.Subscribe("definition.map.deletion.vcloud", deleteDefinitionHandler)
