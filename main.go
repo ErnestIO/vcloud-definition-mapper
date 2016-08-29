@@ -11,11 +11,11 @@ import (
 	"runtime"
 	"time"
 
-	ecc "github.com/ernestio/ernest-config-client"
+	"github.com/ErnestIO/vcloud-definition-mapper/definition"
+	"github.com/ErnestIO/vcloud-definition-mapper/mapper"
+	"github.com/ErnestIO/vcloud-definition-mapper/output"
+	ecc "github.com/ErnestIO/ernest-config-client"
 	"github.com/nats-io/nats"
-	"github.com/r3labs/vcloud-definition-mapper/definition"
-	"github.com/r3labs/vcloud-definition-mapper/mapper"
-	"github.com/r3labs/vcloud-definition-mapper/output"
 )
 
 var nc *nats.Conn

@@ -5,8 +5,8 @@
 package mapper
 
 import (
-	"github.com/r3labs/vcloud-definition-mapper/definition"
-	"github.com/r3labs/vcloud-definition-mapper/output"
+	"github.com/ErnestIO/vcloud-definition-mapper/definition"
+	"github.com/ErnestIO/vcloud-definition-mapper/output"
 )
 
 // MapFirewalls : Maps input firewalls to an ernest format ones

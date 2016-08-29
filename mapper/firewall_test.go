@@ -9,7 +9,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/r3labs/vcloud-definition-mapper/definition"
+	"github.com/ErnestIO/vcloud-definition-mapper/definition"
 )
 
 func TestMapFirewalls(t *testing.T) {

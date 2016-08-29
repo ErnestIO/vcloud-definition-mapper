@@ -8,10 +8,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/r3labs/vcloud-definition-mapper/definition"
+	"github.com/ErnestIO/vcloud-definition-mapper/definition"
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/r3labs/vcloud-definition-mapper/output"
+	"github.com/ErnestIO/vcloud-definition-mapper/output"
 )
 
 func TestInstancesMapping(t *testing.T) {

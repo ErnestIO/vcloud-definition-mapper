@@ -8,9 +8,9 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/ErnestIO/vcloud-definition-mapper/definition"
+	"github.com/ErnestIO/vcloud-definition-mapper/output"
 	"github.com/r3labs/binary-prefix"
-	"github.com/r3labs/vcloud-definition-mapper/definition"
-	"github.com/r3labs/vcloud-definition-mapper/output"
 )
 
 // MapInstances : Maps the instances for the input payload on a ernest internal format
