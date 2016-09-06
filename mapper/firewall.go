@@ -5,8 +5,8 @@
 package mapper
 
 import (
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
-	"github.com/ErnestIO/vcloud-definition-mapper/output"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/output"
 )
 
 // MapFirewalls : Maps input firewalls to an ernest format ones

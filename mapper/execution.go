@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
-	"github.com/ErnestIO/vcloud-definition-mapper/output"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/output"
 )
 
 // MapExecutions : Generates the given executions to a valid internal executions

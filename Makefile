@@ -16,7 +16,7 @@ deps: dev-deps
 	go get github.com/r3labs/binary-prefix
 	go get github.com/r3labs/workflow
 	go get github.com/r3labs/graph
-	go get github.com/ErnestIO/ernest-config-client
+	go get github.com/ernestio/ernest-config-client
 
 dev-deps:
 	go get github.com/golang/lint/golint
