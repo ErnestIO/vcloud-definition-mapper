@@ -11,10 +11,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
-	"github.com/ErnestIO/vcloud-definition-mapper/mapper"
-	"github.com/ErnestIO/vcloud-definition-mapper/output"
-	ecc "github.com/ErnestIO/ernest-config-client"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/mapper"
+	"github.com/ernestio/vcloud-definition-mapper/output"
+	ecc "github.com/ernestio/ernest-config-client"
 	"github.com/nats-io/nats"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
 )
 
 func TestMapNats(t *testing.T) {

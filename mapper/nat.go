@@ -5,8 +5,8 @@
 package mapper
 
 import (
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
-	"github.com/ErnestIO/vcloud-definition-mapper/output"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/output"
 )
 
 // MapNats : Generates necessary nats rules for input networks + salt if

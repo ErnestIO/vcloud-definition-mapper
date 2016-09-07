@@ -8,8 +8,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
-	"github.com/ErnestIO/vcloud-definition-mapper/output"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/output"
 	"github.com/r3labs/binary-prefix"
 )
 

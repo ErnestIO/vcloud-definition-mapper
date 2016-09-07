@@ -7,7 +7,7 @@ package mapper
 import (
 	"testing"
 
-	"github.com/ErnestIO/vcloud-definition-mapper/definition"
+	"github.com/ernestio/vcloud-definition-mapper/definition"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
