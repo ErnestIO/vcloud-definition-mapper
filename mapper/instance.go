@@ -43,7 +43,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 				Cpus:        instance.Cpus,
 				Memory:      memory,
 				Disks:       MapInstanceDisks(instance.Disks),
-				NetworkName: d.GeneratedName() + instance.Networks.Name,
+				NetworkName: generateNetworkName(&d, instance.Networks.Name),
 				IP:          net.ParseIP(ip.String()),
 			}
 
@@ -69,4 +69,16 @@ func MapInstanceDisks(d []string) []output.InstanceDisk {
 	}
 
 	return disks
+}
+
+func generateNetworkName(d *definition.Definition, name string) string {
+	for _, router := range d.Routers {
+		for _, network := range router.Networks {
+			if network.Name == name {
+				return d.GeneratedName() + name
+			}
+		}
+	}
+
+	return name
 }
