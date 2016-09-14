@@ -180,12 +180,42 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	// remove items to be created from the base
+	routers := []Router{}
+	for _, e := range m.Routers.Items {
+		toBeCreated := false
+		for _, c := range m.RoutersToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			routers = append(routers, e)
+		}
+	}
+	m.Routers.Items = routers
+
 	// build new networks
 	for _, network := range m.Networks.Items {
 		if om.FindNetwork(network.Name) == nil {
 			m.NetworksToCreate.Items = append(m.NetworksToCreate.Items, network)
 		}
 	}
+
+	// remove items to be created from the base
+	networks := []Network{}
+	for _, e := range m.Networks.Items {
+		toBeCreated := false
+		for _, c := range m.NetworksToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			networks = append(networks, e)
+		}
+	}
+	m.Networks.Items = networks
 
 	// build new and existing instances
 	for _, instance := range m.Instances.Items {
@@ -204,6 +234,21 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	// remove items to be created from the base
+	instances := []Instance{}
+	for _, e := range m.Instances.Items {
+		toBeCreated := false
+		for _, c := range m.InstancesToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			instances = append(instances, e)
+		}
+	}
+	m.Instances.Items = instances
+
 	// build new and existing firewalls
 	for _, firewall := range m.Firewalls.Items {
 		if of := om.FindFirewall(firewall.Name); of == nil {
@@ -213,6 +258,21 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	// remove items to be created from the base
+	firewalls := []Firewall{}
+	for _, e := range m.Firewalls.Items {
+		toBeCreated := false
+		for _, c := range m.FirewallsToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			firewalls = append(firewalls, e)
+		}
+	}
+	m.Firewalls.Items = firewalls
+
 	// build new and existing nats
 	for _, nat := range m.Nats.Items {
 		if on := om.FindNat(nat.Name); on == nil {
@@ -221,6 +281,21 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
 		}
 	}
+
+	// remove items to be created from the base
+	nats := []Nat{}
+	for _, e := range m.Nats.Items {
+		toBeCreated := false
+		for _, c := range m.NatsToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			nats = append(nats, e)
+		}
+	}
+	m.Nats.Items = nats
 
 	if m.Bootstrapping == "salt" {
 		// build new bootstraps
