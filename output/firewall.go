@@ -9,6 +9,7 @@ type Firewall struct {
 	Name       string         `json:"name"`
 	RouterName string         `json:"router_name"`
 	Rules      []FirewallRule `json:"rules"`
+	Status     string         `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

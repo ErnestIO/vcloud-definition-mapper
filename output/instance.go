@@ -20,6 +20,7 @@ type Instance struct {
 	IP          net.IP         `json:"ip"`
 	Disks       []InstanceDisk `json:"disks"`
 	Exists      bool
+	Status      string `json:"status"`
 }
 
 // InstanceDisk an instance disk

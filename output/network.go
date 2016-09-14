@@ -28,6 +28,7 @@ type Network struct {
 	DatacenterRegion   string   `json:"datacenter_region"`
 	VCloudURL          string   `json:"vcloud_url"`
 	Exists             bool
+	Status             string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

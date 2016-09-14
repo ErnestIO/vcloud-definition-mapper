@@ -8,9 +8,10 @@ import "reflect"
 
 // Router ...
 type Router struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-	IP   string `json:"ip"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	IP     string `json:"ip"`
+	Status string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

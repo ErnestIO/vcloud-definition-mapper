@@ -234,6 +234,26 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	for _, instance := range om.InstancesToUpdate.Items {
+		if instance.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.InstancesToUpdate.Items {
+				if e.Name == instance.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Instances.Items {
+				if e.Name == instance.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.InstancesToUpdate.Items = append(m.InstancesToUpdate.Items, instance)
+			}
+		}
+	}
+
 	// remove items to be created from the base
 	instances := []Instance{}
 	for _, e := range m.Instances.Items {
@@ -258,6 +278,26 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	for _, firewall := range om.FirewallsToUpdate.Items {
+		if firewall.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.FirewallsToUpdate.Items {
+				if e.Name == firewall.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Firewalls.Items {
+				if e.Name == firewall.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.FirewallsToUpdate.Items = append(m.FirewallsToUpdate.Items, firewall)
+			}
+		}
+	}
+
 	// remove items to be created from the base
 	firewalls := []Firewall{}
 	for _, e := range m.Firewalls.Items {
@@ -279,6 +319,26 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.NatsToCreate.Items = append(m.NatsToCreate.Items, nat)
 		} else if nat.HasChanged(on) {
 			m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
+		}
+	}
+
+	for _, nat := range om.NatsToUpdate.Items {
+		if nat.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.NatsToUpdate.Items {
+				if e.Name == nat.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Nats.Items {
+				if e.Name == nat.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
+			}
 		}
 	}
 
