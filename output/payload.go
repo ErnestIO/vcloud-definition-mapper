@@ -154,6 +154,12 @@ type FSMMessage struct {
 		Status   string      `json:"status"`
 		Items    []Execution `json:"items"`
 	} `json:"bootstraps"`
+	BootstrapsToCreate struct {
+		Started  string      `json:"started"`
+		Finished string      `json:"finished"`
+		Status   string      `json:"status"`
+		Items    []Execution `json:"items"`
+	} `json:"bootstraps_to_create"`
 	Executions struct {
 		Started  string      `json:"started"`
 		Finished string      `json:"finished"`
@@ -359,7 +365,41 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 
 	if m.Bootstrapping == "salt" {
 		// build new bootstraps
-		m.Bootstraps.Items = GenerateBootstraps(m.InstancesToCreate.Items)
+		m.BootstrapsToCreate.Items = GenerateBootstraps(m.InstancesToCreate.Items)
+		for _, bootstrap := range om.BootstrapsToCreate.Items {
+			if bootstrap.Status != "completed" {
+				loaded := false
+				exists := false
+				for _, e := range m.BootstrapsToCreate.Items {
+					if e.Name == bootstrap.Name {
+						loaded = true
+					}
+				}
+				for _, e := range m.Bootstraps.Items {
+					if e.Name == bootstrap.Name {
+						exists = true
+					}
+				}
+				if exists == true && loaded == false {
+					m.BootstrapsToCreate.Items = append(m.BootstrapsToCreate.Items, bootstrap)
+				}
+			}
+		}
+
+		// remove items to be created from the base
+		bootstraps := []Execution{}
+		for _, e := range m.Bootstraps.Items {
+			toBeCreated := false
+			for _, c := range m.BootstrapsToCreate.Items {
+				if e.Name == c.Name {
+					toBeCreated = true
+				}
+			}
+			if toBeCreated == false {
+				bootstraps = append(bootstraps, e)
+			}
+		}
+		m.Bootstraps.Items = bootstraps
 		m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, GenerateBootstrapCleanup(m.InstancesToDelete.Items)...)
 
 		// build new executions

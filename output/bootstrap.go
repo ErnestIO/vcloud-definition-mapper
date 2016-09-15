@@ -9,9 +9,7 @@ import (
 )
 
 // GenerateBootstraps : generates necessary bootstraps for instances
-func GenerateBootstraps(instances []Instance) []Execution {
-	var bootstraps []Execution
-
+func GenerateBootstraps(instances []Instance) (bootstraps []Execution) {
 	// Add instance to bootstrap if not salt-master
 	for _, instance := range instances {
 		if instance.IP.String() != "10.254.254.100" {
@@ -28,9 +26,7 @@ func GenerateBootstraps(instances []Instance) []Execution {
 }
 
 // GenerateBootstrapCleanup : When a service updates its bootstraps may need a salt cleanup
-func GenerateBootstrapCleanup(instances []Instance) []Execution {
-	var bootstraps []Execution
-
+func GenerateBootstrapCleanup(instances []Instance) (bootstraps []Execution) {
 	// Add instance to bootstrap if not salt-master
 	for _, instance := range instances {
 		// if instance.IP.String() != "10.254.254.100" && !instance.Exists {

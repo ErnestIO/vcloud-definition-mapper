@@ -17,6 +17,7 @@ type Execution struct {
 	Target  string `json:"target"`
 	Payload string `json:"payload"`
 	Prefix  string `json:"-"`
+	Status  string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes
