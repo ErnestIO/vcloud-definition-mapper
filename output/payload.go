@@ -186,6 +186,13 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	// build old router to delete
+	for _, router := range om.Routers.Items {
+		if m.FindRouter(router.Name) == nil {
+			m.RoutersToDelete.Items = append(m.RoutersToDelete.Items, router)
+		}
+	}
+
 	// remove items to be created from the base
 	routers := []Router{}
 	for _, e := range m.Routers.Items {
@@ -205,6 +212,13 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 	for _, network := range m.Networks.Items {
 		if om.FindNetwork(network.Name) == nil {
 			m.NetworksToCreate.Items = append(m.NetworksToCreate.Items, network)
+		}
+	}
+
+	// build old networks to delete
+	for _, network := range om.Networks.Items {
+		if m.FindNetwork(network.Name) == nil {
+			m.NetworksToDelete.Items = append(m.NetworksToDelete.Items, network)
 		}
 	}
 
@@ -283,6 +297,12 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.FirewallsToUpdate.Items = append(m.FirewallsToUpdate.Items, firewall)
 		}
 	}
+	// build old firewalls to delete
+	for _, firewall := range om.Firewalls.Items {
+		if m.FindFirewall(firewall.Name) == nil {
+			m.FirewallsToDelete.Items = append(m.FirewallsToDelete.Items, firewall)
+		}
+	}
 
 	for _, firewall := range om.FirewallsToUpdate.Items {
 		if firewall.Status != "completed" {
@@ -325,6 +345,12 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.NatsToCreate.Items = append(m.NatsToCreate.Items, nat)
 		} else if nat.HasChanged(on) {
 			m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
+		}
+	}
+	// build old nats to delete
+	for _, nat := range om.Nats.Items {
+		if m.FindNat(nat.Name) == nil {
+			m.NatsToDelete.Items = append(m.NatsToDelete.Items, nat)
 		}
 	}
 
