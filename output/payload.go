@@ -273,6 +273,9 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			}
 		}
 	}
+	for i := range m.InstancesToUpdate.Items {
+		m.InstancesToUpdate.Items[i].Status = ""
+	}
 
 	// remove items to be created from the base
 	instances := []Instance{}
@@ -323,6 +326,9 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			}
 		}
 	}
+	for i := range m.FirewallsToUpdate.Items {
+		m.FirewallsToUpdate.Items[i].Status = ""
+	}
 
 	// remove items to be created from the base
 	firewalls := []Firewall{}
@@ -372,6 +378,10 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
 			}
 		}
+	}
+
+	for i := range m.NatsToUpdate.Items {
+		m.NatsToUpdate.Items[i].Status = ""
 	}
 
 	// remove items to be created from the base
@@ -426,6 +436,9 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			}
 		}
 		m.Bootstraps.Items = bootstraps
+		for i := range m.BootstrapsToCreate.Items {
+			m.BootstrapsToCreate.Items[i].Status = ""
+		}
 		m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, GenerateBootstrapCleanup(m.InstancesToDelete.Items)...)
 
 		// build new executions
