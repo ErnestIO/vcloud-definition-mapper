@@ -462,8 +462,8 @@ func (m *FSMMessage) GenerateWorkflow(path string) error {
 	w.SetCount("nats_deleted", len(m.NatsToDelete.Items))
 
 	// Set bootstrap items
-	w.SetCount("bootstrapping", len(m.Bootstraps.Items))
-	w.SetCount("bootstrap_ran", len(m.Bootstraps.Items))
+	w.SetCount("bootstrapping", len(m.BootstrapsToCreate.Items))
+	w.SetCount("bootstrap_ran", len(m.BootstrapsToCreate.Items))
 
 	// Set execution items
 	w.SetCount("running_executions", len(m.ExecutionsToCreate.Items))
