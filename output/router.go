@@ -4,16 +4,20 @@
 
 package output
 
-import "reflect"
-
 // Router ...
 type Router struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-	IP   string `json:"ip"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	IP     string `json:"ip"`
+	Status string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (r *Router) HasChanged(or *Router) bool {
-	return !reflect.DeepEqual(*r, *or)
+	if r.Name == or.Name &&
+		r.Type == or.Type &&
+		r.IP == or.IP {
+		return false
+	}
+	return true
 }

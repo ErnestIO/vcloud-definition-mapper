@@ -28,9 +28,21 @@ type Network struct {
 	DatacenterRegion   string   `json:"datacenter_region"`
 	VCloudURL          string   `json:"vcloud_url"`
 	Exists             bool
+	Status             string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (n *Network) HasChanged(on *Network) bool {
-	return !reflect.DeepEqual(*n, *on)
+	if n.Name == on.Name &&
+		n.Type == on.Type &&
+		n.Service == on.Service &&
+		n.Subnet == on.Subnet &&
+		n.Netmask == on.Netmask &&
+		n.StartAddress == on.StartAddress &&
+		n.EndAddress == on.EndAddress &&
+		n.Gateway == on.Gateway &&
+		reflect.DeepEqual(n.DNS, on.DNS) {
+		return false
+	}
+	return true
 }

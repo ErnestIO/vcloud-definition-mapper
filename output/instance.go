@@ -20,6 +20,7 @@ type Instance struct {
 	IP          net.IP         `json:"ip"`
 	Disks       []InstanceDisk `json:"disks"`
 	Exists      bool
+	Status      string `json:"status"`
 }
 
 // InstanceDisk an instance disk
@@ -30,5 +31,15 @@ type InstanceDisk struct {
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (i *Instance) HasChanged(oi *Instance) bool {
-	return !reflect.DeepEqual(*i, *oi)
+	if i.Name == oi.Name &&
+		i.Catalog == oi.Catalog &&
+		i.Image == oi.Image &&
+		i.Cpus == oi.Cpus &&
+		i.Memory == oi.Memory &&
+		i.NetworkName == oi.NetworkName &&
+		string(i.IP) == string(oi.IP) &&
+		reflect.DeepEqual(i.Disks, oi.Disks) {
+		return false
+	}
+	return true
 }

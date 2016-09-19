@@ -154,6 +154,12 @@ type FSMMessage struct {
 		Status   string      `json:"status"`
 		Items    []Execution `json:"items"`
 	} `json:"bootstraps"`
+	BootstrapsToCreate struct {
+		Started  string      `json:"started"`
+		Finished string      `json:"finished"`
+		Status   string      `json:"status"`
+		Items    []Execution `json:"items"`
+	} `json:"bootstraps_to_create"`
 	Executions struct {
 		Started  string      `json:"started"`
 		Finished string      `json:"finished"`
@@ -180,12 +186,56 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	// build old router to delete
+	for _, router := range om.Routers.Items {
+		if m.FindRouter(router.Name) == nil {
+			m.RoutersToDelete.Items = append(m.RoutersToDelete.Items, router)
+		}
+	}
+
+	// remove items to be created from the base
+	routers := []Router{}
+	for _, e := range m.Routers.Items {
+		toBeCreated := false
+		for _, c := range m.RoutersToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			routers = append(routers, e)
+		}
+	}
+	m.Routers.Items = routers
+
 	// build new networks
 	for _, network := range m.Networks.Items {
 		if om.FindNetwork(network.Name) == nil {
 			m.NetworksToCreate.Items = append(m.NetworksToCreate.Items, network)
 		}
 	}
+
+	// build old networks to delete
+	for _, network := range om.Networks.Items {
+		if m.FindNetwork(network.Name) == nil {
+			m.NetworksToDelete.Items = append(m.NetworksToDelete.Items, network)
+		}
+	}
+
+	// remove items to be created from the base
+	networks := []Network{}
+	for _, e := range m.Networks.Items {
+		toBeCreated := false
+		for _, c := range m.NetworksToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			networks = append(networks, e)
+		}
+	}
+	m.Networks.Items = networks
 
 	// build new and existing instances
 	for _, instance := range m.Instances.Items {
@@ -204,6 +254,44 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		}
 	}
 
+	for _, instance := range om.InstancesToUpdate.Items {
+		if instance.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.InstancesToUpdate.Items {
+				if e.Name == instance.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Instances.Items {
+				if e.Name == instance.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.InstancesToUpdate.Items = append(m.InstancesToUpdate.Items, instance)
+			}
+		}
+	}
+	for i := range m.InstancesToUpdate.Items {
+		m.InstancesToUpdate.Items[i].Status = ""
+	}
+
+	// remove items to be created from the base
+	instances := []Instance{}
+	for _, e := range m.Instances.Items {
+		toBeCreated := false
+		for _, c := range m.InstancesToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			instances = append(instances, e)
+		}
+	}
+	m.Instances.Items = instances
+
 	// build new and existing firewalls
 	for _, firewall := range m.Firewalls.Items {
 		if of := om.FindFirewall(firewall.Name); of == nil {
@@ -212,6 +300,50 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.FirewallsToUpdate.Items = append(m.FirewallsToUpdate.Items, firewall)
 		}
 	}
+	// build old firewalls to delete
+	for _, firewall := range om.Firewalls.Items {
+		if m.FindFirewall(firewall.Name) == nil {
+			m.FirewallsToDelete.Items = append(m.FirewallsToDelete.Items, firewall)
+		}
+	}
+
+	for _, firewall := range om.FirewallsToUpdate.Items {
+		if firewall.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.FirewallsToUpdate.Items {
+				if e.Name == firewall.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Firewalls.Items {
+				if e.Name == firewall.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.FirewallsToUpdate.Items = append(m.FirewallsToUpdate.Items, firewall)
+			}
+		}
+	}
+	for i := range m.FirewallsToUpdate.Items {
+		m.FirewallsToUpdate.Items[i].Status = ""
+	}
+
+	// remove items to be created from the base
+	firewalls := []Firewall{}
+	for _, e := range m.Firewalls.Items {
+		toBeCreated := false
+		for _, c := range m.FirewallsToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			firewalls = append(firewalls, e)
+		}
+	}
+	m.Firewalls.Items = firewalls
 
 	// build new and existing nats
 	for _, nat := range m.Nats.Items {
@@ -221,10 +353,93 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
 		}
 	}
+	// build old nats to delete
+	for _, nat := range om.Nats.Items {
+		if m.FindNat(nat.Name) == nil {
+			m.NatsToDelete.Items = append(m.NatsToDelete.Items, nat)
+		}
+	}
+
+	for _, nat := range om.NatsToUpdate.Items {
+		if nat.Status != "completed" {
+			loaded := false
+			exists := false
+			for _, e := range m.NatsToUpdate.Items {
+				if e.Name == nat.Name {
+					loaded = true
+				}
+			}
+			for _, e := range m.Nats.Items {
+				if e.Name == nat.Name {
+					exists = true
+				}
+			}
+			if exists == true && loaded == false {
+				m.NatsToUpdate.Items = append(m.NatsToUpdate.Items, nat)
+			}
+		}
+	}
+
+	for i := range m.NatsToUpdate.Items {
+		m.NatsToUpdate.Items[i].Status = ""
+	}
+
+	// remove items to be created from the base
+	nats := []Nat{}
+	for _, e := range m.Nats.Items {
+		toBeCreated := false
+		for _, c := range m.NatsToCreate.Items {
+			if e.Name == c.Name {
+				toBeCreated = true
+			}
+		}
+		if toBeCreated == false {
+			nats = append(nats, e)
+		}
+	}
+	m.Nats.Items = nats
 
 	if m.Bootstrapping == "salt" {
 		// build new bootstraps
-		m.Bootstraps.Items = GenerateBootstraps(m.InstancesToCreate.Items)
+		m.BootstrapsToCreate.Items = GenerateBootstraps(m.InstancesToCreate.Items)
+		for _, bootstrap := range om.BootstrapsToCreate.Items {
+			if bootstrap.Status != "completed" {
+				loaded := false
+				exists := false
+				for _, e := range m.BootstrapsToCreate.Items {
+					if e.Name == bootstrap.Name {
+						loaded = true
+					}
+				}
+				for _, e := range m.Bootstraps.Items {
+					if e.Name == bootstrap.Name {
+						exists = true
+					}
+				}
+				if exists == true && loaded == false {
+					m.BootstrapsToCreate.Items = append(m.BootstrapsToCreate.Items, bootstrap)
+				}
+			}
+		}
+
+		// remove items to be created from the base
+		bootstraps := []Execution{}
+		for _, e := range m.Bootstraps.Items {
+			toBeCreated := false
+			for _, c := range m.BootstrapsToCreate.Items {
+				if e.Name == c.Name {
+					toBeCreated = true
+				}
+			}
+			if toBeCreated == false {
+				bootstraps = append(bootstraps, e)
+			}
+		}
+		m.Bootstraps.Items = bootstraps
+
+		for i := range m.BootstrapsToCreate.Items {
+			m.BootstrapsToCreate.Items[i].Status = ""
+		}
 		m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, GenerateBootstrapCleanup(m.InstancesToDelete.Items)...)
 
 		// build new executions
@@ -238,6 +453,21 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
 			}
 		}
+
+		// remove items to be created from the base
+		executions := []Execution{}
+		for _, e := range m.Executions.Items {
+			toBeCreated := false
+			for _, c := range m.ExecutionsToCreate.Items {
+				if e.Name == c.Name {
+					toBeCreated = true
+				}
+			}
+			if toBeCreated == false {
+				executions = append(executions, e)
+			}
+		}
+		m.Executions.Items = executions
 	}
 
 }
@@ -248,6 +478,52 @@ func (m *FSMMessage) GenerateWorkflow(path string) error {
 	err := w.LoadFile("./output/arcs/" + path)
 	if err != nil {
 		return err
+	}
+
+	for i := range m.RoutersToCreate.Items {
+		m.RoutersToCreate.Items[i].Status = ""
+	}
+	for i := range m.RoutersToDelete.Items {
+		m.RoutersToDelete.Items[i].Status = ""
+	}
+	for i := range m.NetworksToCreate.Items {
+		m.NetworksToCreate.Items[i].Status = ""
+	}
+	for i := range m.NetworksToDelete.Items {
+		m.NetworksToDelete.Items[i].Status = ""
+	}
+	for i := range m.InstancesToCreate.Items {
+		m.InstancesToCreate.Items[i].Status = ""
+	}
+	for i := range m.InstancesToUpdate.Items {
+		m.InstancesToUpdate.Items[i].Status = ""
+	}
+	for i := range m.InstancesToDelete.Items {
+		m.InstancesToDelete.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToCreate.Items {
+		m.FirewallsToCreate.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToUpdate.Items {
+		m.FirewallsToUpdate.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToDelete.Items {
+		m.FirewallsToDelete.Items[i].Status = ""
+	}
+	for i := range m.NatsToCreate.Items {
+		m.NatsToCreate.Items[i].Status = ""
+	}
+	for i := range m.NatsToUpdate.Items {
+		m.NatsToUpdate.Items[i].Status = ""
+	}
+	for i := range m.NatsToDelete.Items {
+		m.NatsToDelete.Items[i].Status = ""
+	}
+	for i := range m.ExecutionsToCreate.Items {
+		m.ExecutionsToCreate.Items[i].Status = ""
+	}
+	for i := range m.BootstrapsToCreate.Items {
+		m.BootstrapsToCreate.Items[i].Status = ""
 	}
 
 	// Set router items
@@ -287,8 +563,8 @@ func (m *FSMMessage) GenerateWorkflow(path string) error {
 	w.SetCount("nats_deleted", len(m.NatsToDelete.Items))
 
 	// Set bootstrap items
-	w.SetCount("bootstrapping", len(m.Bootstraps.Items))
-	w.SetCount("bootstrap_ran", len(m.Bootstraps.Items))
+	w.SetCount("bootstrapping", len(m.BootstrapsToCreate.Items))
+	w.SetCount("bootstrap_ran", len(m.BootstrapsToCreate.Items))
 
 	// Set execution items
 	w.SetCount("running_executions", len(m.ExecutionsToCreate.Items))

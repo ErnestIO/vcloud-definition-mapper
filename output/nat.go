@@ -10,6 +10,7 @@ type Nat struct {
 	Service    string    `json:"service"`
 	RouterName string    `json:"router_name"`
 	Rules      []NatRule `json:"rules"`
+	Status     string    `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

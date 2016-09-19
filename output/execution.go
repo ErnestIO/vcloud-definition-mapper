@@ -6,7 +6,6 @@ package output
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -17,11 +16,19 @@ type Execution struct {
 	Target  string `json:"target"`
 	Payload string `json:"payload"`
 	Prefix  string `json:"-"`
+	Status  string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (e *Execution) HasChanged(oe *Execution) bool {
-	return !reflect.DeepEqual(*e, *oe)
+	if e.Name == oe.Name &&
+		e.Type == oe.Type &&
+		e.Target == oe.Target &&
+		e.Payload == oe.Payload &&
+		e.Prefix == oe.Prefix {
+		return false
+	}
+	return true
 }
 
 // TargetHasChanged returns true if the execution's target has changed
