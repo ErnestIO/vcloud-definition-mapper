@@ -480,6 +480,52 @@ func (m *FSMMessage) GenerateWorkflow(path string) error {
 		return err
 	}
 
+	for i := range m.RoutersToCreate.Items {
+		m.RoutersToCreate.Items[i].Status = ""
+	}
+	for i := range m.RoutersToDelete.Items {
+		m.RoutersToDelete.Items[i].Status = ""
+	}
+	for i := range m.NetworksToCreate.Items {
+		m.NetworksToCreate.Items[i].Status = ""
+	}
+	for i := range m.NetworksToDelete.Items {
+		m.NetworksToDelete.Items[i].Status = ""
+	}
+	for i := range m.InstancesToCreate.Items {
+		m.InstancesToCreate.Items[i].Status = ""
+	}
+	for i := range m.InstancesToUpdate.Items {
+		m.InstancesToUpdate.Items[i].Status = ""
+	}
+	for i := range m.InstancesToDelete.Items {
+		m.InstancesToDelete.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToCreate.Items {
+		m.FirewallsToCreate.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToUpdate.Items {
+		m.FirewallsToUpdate.Items[i].Status = ""
+	}
+	for i := range m.FirewallsToDelete.Items {
+		m.FirewallsToDelete.Items[i].Status = ""
+	}
+	for i := range m.NatsToCreate.Items {
+		m.NatsToCreate.Items[i].Status = ""
+	}
+	for i := range m.NatsToUpdate.Items {
+		m.NatsToUpdate.Items[i].Status = ""
+	}
+	for i := range m.NatsToDelete.Items {
+		m.NatsToDelete.Items[i].Status = ""
+	}
+	for i := range m.ExecutionsToCreate.Items {
+		m.ExecutionsToCreate.Items[i].Status = ""
+	}
+	for i := range m.BootstrapsToCreate.Items {
+		m.BootstrapsToCreate.Items[i].Status = ""
+	}
+
 	// Set router items
 	w.SetCount("creating_routers", len(m.RoutersToCreate.Items))
 	w.SetCount("routers_created", len(m.RoutersToCreate.Items))
