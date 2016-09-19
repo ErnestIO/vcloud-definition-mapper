@@ -16,7 +16,7 @@ type Router struct {
 func (r *Router) HasChanged(or *Router) bool {
 	if r.Name == or.Name &&
 		r.Type == or.Type &&
-		r.IP == or.Type {
+		r.IP == or.IP {
 		return false
 	}
 	return true

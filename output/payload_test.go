@@ -187,7 +187,7 @@ func TestPayloadDiff(t *testing.T) {
 					So(len(m.ExecutionsToCreate.Items), ShouldEqual, 1)
 					So(m.ExecutionsToCreate.Items[0].Name, ShouldEqual, "Execution")
 					So(m.ExecutionsToCreate.Items[0].Payload, ShouldEqual, "date")
-					So(m.Executions.Items[0].Target, ShouldEqual, "list:test-1,test-2")
+					So(m.ExecutionsToCreate.Items[0].Target, ShouldEqual, "list:test-1,test-2")
 				})
 			})
 
@@ -205,7 +205,7 @@ func TestPayloadDiff(t *testing.T) {
 					So(len(m.ExecutionsToCreate.Items), ShouldEqual, 1)
 					So(m.ExecutionsToCreate.Items[0].Name, ShouldEqual, "Execution")
 					So(m.ExecutionsToCreate.Items[0].Payload, ShouldEqual, "date")
-					So(m.Executions.Items[0].Target, ShouldEqual, "list:test-1,test-2")
+					So(m.ExecutionsToCreate.Items[0].Target, ShouldEqual, "list:test-1,test-2")
 				})
 			})
 
@@ -246,7 +246,7 @@ func TestPayloadDiff(t *testing.T) {
 					So(len(m.ExecutionsToCreate.Items), ShouldEqual, 1)
 					So(m.ExecutionsToCreate.Items[0].Name, ShouldEqual, "Execution")
 					So(m.ExecutionsToCreate.Items[0].Payload, ShouldEqual, "date")
-					So(m.Executions.Items[0].Target, ShouldEqual, "list:test-1,test-2")
+					So(m.ExecutionsToCreate.Items[0].Target, ShouldEqual, "list:test-1,test-2")
 				})
 			})
 		})
