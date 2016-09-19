@@ -42,5 +42,4 @@ func GenerateBootstrapCleanup(instances []Instance) (bootstraps []Execution) {
 	}
 
 	return bootstraps
-
 }
