@@ -436,6 +436,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 			}
 		}
 		m.Bootstraps.Items = bootstraps
+
 		for i := range m.BootstrapsToCreate.Items {
 			m.BootstrapsToCreate.Items[i].Status = ""
 		}
@@ -452,6 +453,21 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
 			}
 		}
+
+		// remove items to be created from the base
+		executions := []Execution{}
+		for _, e := range m.Executions.Items {
+			toBeCreated := false
+			for _, c := range m.ExecutionsToCreate.Items {
+				if e.Name == c.Name {
+					toBeCreated = true
+				}
+			}
+			if toBeCreated == false {
+				executions = append(executions, e)
+			}
+		}
+		m.Executions.Items = executions
 	}
 
 }
