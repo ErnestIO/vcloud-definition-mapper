@@ -33,10 +33,6 @@ func (e *Execution) HasChanged(oe *Execution) bool {
 
 // TargetHasChanged returns true if the execution's target has changed
 func (e *Execution) TargetHasChanged(oe *Execution) bool {
-	// Return false if instances have been removed
-	if len(strings.Split(e.Target, ",")) < len(strings.Split(oe.Target, ",")) {
-		return false
-	}
 	return e.Target != oe.Target
 }
 
