@@ -449,8 +449,10 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
 			} else if execution.TargetHasChanged(oe) {
 				instances := m.FilterNewInstances(execution.Prefix)
-				execution.RebuildTarget(instances)
-				m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
+				if len(instances) != 0 {
+					execution.RebuildTarget(instances)
+					m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
+				}
 			}
 		}
 
