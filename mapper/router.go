@@ -15,9 +15,18 @@ func MapRouters(d definition.Definition, rtype string) []output.Router {
 
 	for _, router := range d.Routers {
 		r := output.Router{
-			Name: router.Name,
-			Type: rtype,
-			IP:   d.ServiceIP,
+			Name:               router.Name,
+			Type:               rtype,
+			IP:                 d.ServiceIP,
+			ClientName:         `$(client_name)`,
+			DatacenterName:     `$(datacenters.items.0.name)`,
+			DatacenterPassword: `$(datacenters.items.0.password)`,
+			DatacenterRegion:   `$(datacenters.items.0.region)`,
+			DatacenterType:     `$(datacenters.items.0.type)`,
+			DatacenterUsername: `$(datacenters.items.0.username)`,
+			ExternalNetwork:    `$(datacenters.items.0.external_network)`,
+			VCloudURL:          `$(datacenters.items.0.vcloud_url)`,
+			VseURL:             `$(datacenters.items.0.vse_url)`,
 		}
 		routers = append(routers, r)
 	}
