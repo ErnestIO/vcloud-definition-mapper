@@ -35,7 +35,6 @@ func TestNetworksMapping(t *testing.T) {
 				Convey("Then only input networks should be mapped", func() {
 					So(len(n), ShouldEqual, 1)
 					So(n[0].Name, ShouldEqual, "datacenter-test-bar")
-					So(n[0].RouterName, ShouldEqual, "test")
 					So(n[0].Subnet, ShouldEqual, "10.0.0.0/24")
 				})
 			})
@@ -46,12 +45,10 @@ func TestNetworksMapping(t *testing.T) {
 				Convey("Then an extra network should be created", func() {
 					So(len(n), ShouldEqual, 2)
 					So(n[0].Name, ShouldEqual, "datacenter-test-salt")
-					So(n[0].RouterName, ShouldEqual, "test")
 					So(n[0].Subnet, ShouldEqual, "10.254.254.0/24")
 				})
 				Convey("Then input network should be mapped as usual", func() {
 					So(n[1].Name, ShouldEqual, "datacenter-test-bar")
-					So(n[1].RouterName, ShouldEqual, "test")
 					So(n[1].Subnet, ShouldEqual, "10.0.0.0/24")
 				})
 			})
