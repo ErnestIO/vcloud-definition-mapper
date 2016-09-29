@@ -11,16 +11,23 @@ import (
 
 // Instance ...
 type Instance struct {
-	Name        string         `json:"name"`
-	Catalog     string         `json:"reference_catalog"`
-	Image       string         `json:"reference_image"`
-	Cpus        int            `json:"cpus"`
-	Memory      int            `json:"ram"`
-	NetworkName string         `json:"network_name"`
-	IP          net.IP         `json:"ip"`
-	Disks       []InstanceDisk `json:"disks"`
-	Exists      bool
-	Status      string `json:"status"`
+	Name               string         `json:"name"`
+	Catalog            string         `json:"reference_catalog"`
+	Image              string         `json:"reference_image"`
+	Cpus               int            `json:"cpus"`
+	Memory             int            `json:"ram"`
+	NetworkName        string         `json:"network_name"`
+	IP                 net.IP         `json:"ip"`
+	Disks              []InstanceDisk `json:"disks"`
+	ClientName         string         `json:"client_name"`
+	DatacenterType     string         `json:"datacenter_type"`
+	DatacenterName     string         `json:"datacenter_name"`
+	DatacenterUsername string         `json:"datacenter_username"`
+	DatacenterPassword string         `json:"datacenter_password"`
+	DatacenterRegion   string         `json:"datacenter_region"`
+	VCloudURL          string         `json:"vcloud_url"`
+	Exists             bool
+	Status             string `json:"status"`
 }
 
 // InstanceDisk an instance disk
