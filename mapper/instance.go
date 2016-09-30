@@ -19,14 +19,21 @@ func MapInstances(d definition.Definition) []output.Instance {
 
 	if d.IsSaltBootstrapped() {
 		instances = append(instances, output.Instance{
-			Name:        d.GeneratedName() + "salt-master",
-			Catalog:     "r3",
-			Image:       "r3-salt-master",
-			Cpus:        1,
-			Memory:      2048,
-			Disks:       []output.InstanceDisk{},
-			NetworkName: d.GeneratedName() + "salt",
-			IP:          net.ParseIP("10.254.254.100"),
+			Name:               d.GeneratedName() + "salt-master",
+			Catalog:            "r3",
+			Image:              "r3-salt-master",
+			Cpus:               1,
+			Memory:             2048,
+			Disks:              []output.InstanceDisk{},
+			NetworkName:        d.GeneratedName() + "salt",
+			IP:                 net.ParseIP("10.254.254.100"),
+			ClientName:         "$(client_name)",
+			DatacenterType:     "$(datacenters.items.0.type)",
+			DatacenterName:     "$(datacenters.items.0.name)",
+			DatacenterUsername: "$(datacenters.items.0.username)",
+			DatacenterPassword: "$(datacenters.items.0.password)",
+			DatacenterRegion:   "$(datacenters.items.0.region)",
+			VCloudURL:          "$(datacentes.items.0.vcloud_url)",
 		})
 	}
 
@@ -37,14 +44,21 @@ func MapInstances(d definition.Definition) []output.Instance {
 
 		for i := 0; i < instance.Count; i++ {
 			newInstance := output.Instance{
-				Name:        d.GeneratedName() + instance.Name + "-" + strconv.Itoa(i+1),
-				Catalog:     instance.Catalog(),
-				Image:       instance.Template(),
-				Cpus:        instance.Cpus,
-				Memory:      memory,
-				Disks:       MapInstanceDisks(instance.Disks),
-				NetworkName: generateNetworkName(&d, instance.Networks.Name),
-				IP:          net.ParseIP(ip.String()),
+				Name:               d.GeneratedName() + instance.Name + "-" + strconv.Itoa(i+1),
+				Catalog:            instance.Catalog(),
+				Image:              instance.Template(),
+				Cpus:               instance.Cpus,
+				Memory:             memory,
+				Disks:              MapInstanceDisks(instance.Disks),
+				NetworkName:        generateNetworkName(&d, instance.Networks.Name),
+				IP:                 net.ParseIP(ip.String()),
+				ClientName:         "$(client_name)",
+				DatacenterType:     "$(datacenters.items.0.type)",
+				DatacenterName:     "$(datacenters.items.0.name)",
+				DatacenterUsername: "$(datacenters.items.0.username)",
+				DatacenterPassword: "$(datacenters.items.0.password)",
+				DatacenterRegion:   "$(datacenters.items.0.region)",
+				VCloudURL:          "$(datacentes.items.0.vcloud_url)",
 			}
 
 			instances = append(instances, newInstance)
