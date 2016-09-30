@@ -6,11 +6,20 @@ package output
 
 // Nat ...
 type Nat struct {
-	Name       string    `json:"name"`
-	Service    string    `json:"service"`
-	RouterName string    `json:"router_name"`
-	Rules      []NatRule `json:"rules"`
-	Status     string    `json:"status"`
+	Name               string    `json:"name"`
+	Rules              []NatRule `json:"rules"`
+	ClientName         string    `json:"client_name"`
+	RouterName         string    `json:"router_name"`
+	RouterType         string    `json:"router_type"`
+	RouterIP           string    `json:"router_ip"`
+	DatacenterName     string    `json:"datacenter_name"`
+	DatacenterPassword string    `json:"datacenter_password"`
+	DatacenterRegion   string    `json:"datacenter_region"`
+	DatacenterType     string    `json:"datacenter_type"`
+	DatacenterUsername string    `json:"datacenter_username"`
+	ExternalNetwork    string    `json:"external_network"`
+	VCloudURL          string    `json:"vcloud_url"`
+	Status             string    `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

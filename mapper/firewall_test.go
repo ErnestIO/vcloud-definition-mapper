@@ -46,7 +46,6 @@ func TestMapFirewalls(t *testing.T) {
 				Convey("Then it should map salt and input firewall rules", func() {
 					So(len(f), ShouldEqual, 1)
 					So(f[0].Name, ShouldEqual, "datacenter-service-test")
-					So(f[0].RouterName, ShouldEqual, "test")
 					So(len(f[0].Rules), ShouldEqual, 6)
 					So(f[0].Rules[0].DestinationIP, ShouldEqual, "any")
 					So(f[0].Rules[0].DestinationPort, ShouldEqual, "22")
@@ -87,7 +86,6 @@ func TestMapFirewalls(t *testing.T) {
 				Convey("Then it should map only the input firewall rules", func() {
 					So(len(f), ShouldEqual, 1)
 					So(f[0].Name, ShouldEqual, "datacenter-service-test")
-					So(f[0].RouterName, ShouldEqual, "test")
 					So(len(f[0].Rules), ShouldEqual, 1)
 					So(f[0].Rules[0].DestinationIP, ShouldEqual, "10.10.10.10")
 					So(f[0].Rules[0].DestinationPort, ShouldEqual, "80")

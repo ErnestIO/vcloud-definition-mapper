@@ -19,8 +19,17 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 		}
 
 		f := output.Firewall{
-			Name:       d.GeneratedName() + r.Name,
-			RouterName: r.Name,
+			Name:               d.GeneratedName() + r.Name,
+			RouterName:         "$(routers.items.0.name)",
+			RouterType:         "$(routers.items.0.type)",
+			RouterIP:           "$(routers.items.0.ip)",
+			ClientName:         "$(client_name)",
+			DatacenterType:     "$(datacenters.items.0.type)",
+			DatacenterName:     "$(datacenters.items.0.name)",
+			DatacenterUsername: "$(datacenters.items.0.username)",
+			DatacenterPassword: "$(datacenters.items.0.password)",
+			DatacenterRegion:   "$(datacenters.items.0.region)",
+			VCloudURL:          "$(datacentes.items.0.vcloud_url)",
 		}
 
 		if d.IsSaltBootstrapped() {

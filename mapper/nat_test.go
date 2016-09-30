@@ -45,7 +45,6 @@ func TestMapNats(t *testing.T) {
 				Convey("Then it should map salt and input firewall rules", func() {
 					So(len(n), ShouldEqual, 1)
 					So(n[0].Name, ShouldEqual, "datacenter-service-test")
-					So(n[0].RouterName, ShouldEqual, "test")
 					So(len(n[0].Rules), ShouldEqual, 5)
 					So(n[0].Rules[0].OriginIP, ShouldEqual, "")
 					So(n[0].Rules[0].OriginPort, ShouldEqual, "8000")
@@ -91,7 +90,6 @@ func TestMapNats(t *testing.T) {
 				Convey("Then it should map only the input firewall rules", func() {
 					So(len(n), ShouldEqual, 1)
 					So(n[0].Name, ShouldEqual, "datacenter-service-test")
-					So(n[0].RouterName, ShouldEqual, "test")
 					So(len(n[0].Rules), ShouldEqual, 2)
 					So(n[0].Rules[0].OriginIP, ShouldEqual, "10.0.0.0/24")
 					So(n[0].Rules[0].OriginPort, ShouldEqual, "any")
