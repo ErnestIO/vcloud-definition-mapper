@@ -40,6 +40,16 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 
 		// Validate Firewall Rules
 		for _, rule := range r.Rules {
+			snw := d.FindNetwork(rule.Source)
+			if snw != nil {
+				rule.Source = snw.Subnet
+			}
+
+			dnw := d.FindNetwork(rule.Destination)
+			if dnw != nil {
+				rule.Destination = dnw.Subnet
+			}
+
 			f.Rules = append(f.Rules, output.FirewallRule{
 				Name:            rule.Name,
 				SourceIP:        rule.Source,
@@ -94,23 +104,13 @@ func MapErnestIPSaltRules(ips []string) []output.FirewallRule {
 
 	// Allow port 8000 to current ernest instance
 	for _, ip := range ips {
-		/*
-			sw := false
-			for _, rule := range f.Rules {
-				if rule.SourceIP == ip {
-					sw = true
-				}
-			}
-			if sw == false {
-		*/
 		rules = append(rules, output.FirewallRule{
 			SourceIP:        ip,
 			SourcePort:      "any",
-			DestinationIP:   "",
+			DestinationIP:   "$(routers.items.0.ip)",
 			DestinationPort: "8000",
 			Protocol:        "tcp",
 		})
-		//}
 	}
 
 	return rules

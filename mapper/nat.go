@@ -44,7 +44,7 @@ func MapNats(d definition.Definition, externalNetwork string) []output.Nat {
 				Type:            "snat",
 				OriginIP:        network.Subnet,
 				OriginPort:      "any",
-				TranslationIP:   "",
+				TranslationIP:   "$(routers.items.0.ip)",
 				TranslationPort: "any",
 				Protocol:        "any",
 				Network:         externalNetwork,
@@ -75,7 +75,7 @@ func MapDefaultSaltNatRules(externalNetwork string) []output.NatRule {
 
 	rules = append(rules, output.NatRule{
 		Type:            "dnat",
-		OriginIP:        "",
+		OriginIP:        "$(routers.items.0.ip)",
 		OriginPort:      "8000",
 		TranslationIP:   "10.254.254.100",
 		TranslationPort: "8000",
@@ -85,7 +85,7 @@ func MapDefaultSaltNatRules(externalNetwork string) []output.NatRule {
 
 	rules = append(rules, output.NatRule{
 		Type:            "dnat",
-		OriginIP:        "",
+		OriginIP:        "$(routers.items.0.ip)",
 		OriginPort:      "22",
 		TranslationIP:   "10.254.254.100",
 		TranslationPort: "22",
@@ -97,7 +97,7 @@ func MapDefaultSaltNatRules(externalNetwork string) []output.NatRule {
 		Type:            "snat",
 		OriginIP:        "10.254.254.0/24",
 		OriginPort:      "any",
-		TranslationIP:   "",
+		TranslationIP:   "$(routers.items.0.ip)",
 		TranslationPort: "any",
 		Protocol:        "any",
 		Network:         externalNetwork,
