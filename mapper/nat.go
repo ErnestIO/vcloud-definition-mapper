@@ -31,7 +31,7 @@ func MapNats(d definition.Definition, externalNetwork string) []output.Nat {
 			DatacenterUsername: "$(datacenters.items.0.username)",
 			DatacenterPassword: "$(datacenters.items.0.password)",
 			DatacenterRegion:   "$(datacenters.items.0.region)",
-			VCloudURL:          "$(datacentes.items.0.vcloud_url)",
+			VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 		}
 
 		if d.IsSaltBootstrapped() {
