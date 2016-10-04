@@ -29,7 +29,7 @@ func MapNetworks(d definition.Definition) []output.Network {
 				DatacenterUsername: "$(datacenters.items.0.username)",
 				DatacenterPassword: "$(datacenters.items.0.password)",
 				DatacenterRegion:   "$(datacenters.items.0.region)",
-				VCloudURL:          "$(datacentes.items.0.vcloud_url)",
+				VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 			}
 
 			networks = append(networks, sn)
@@ -50,7 +50,7 @@ func MapNetworks(d definition.Definition) []output.Network {
 				DatacenterUsername: "$(datacenters.items.0.username)",
 				DatacenterPassword: "$(datacenters.items.0.password)",
 				DatacenterRegion:   "$(datacenters.items.0.region)",
-				VCloudURL:          "$(datacentes.items.0.vcloud_url)",
+				VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 			}
 
 			networks = append(networks, n)

@@ -19,8 +19,17 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 		}
 
 		f := output.Firewall{
-			Name:       d.GeneratedName() + r.Name,
-			RouterName: r.Name,
+			Name:               d.GeneratedName() + r.Name,
+			RouterName:         "$(routers.items.0.name)",
+			RouterType:         "$(routers.items.0.type)",
+			RouterIP:           "$(routers.items.0.ip)",
+			ClientName:         "$(client_name)",
+			DatacenterType:     "$(datacenters.items.0.type)",
+			DatacenterName:     "$(datacenters.items.0.name)",
+			DatacenterUsername: "$(datacenters.items.0.username)",
+			DatacenterPassword: "$(datacenters.items.0.password)",
+			DatacenterRegion:   "$(datacenters.items.0.region)",
+			VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 		}
 
 		if d.IsSaltBootstrapped() {
@@ -31,6 +40,16 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 
 		// Validate Firewall Rules
 		for _, rule := range r.Rules {
+			snw := d.FindNetwork(rule.Source)
+			if snw != nil {
+				rule.Source = snw.Subnet
+			}
+
+			dnw := d.FindNetwork(rule.Destination)
+			if dnw != nil {
+				rule.Destination = dnw.Subnet
+			}
+
 			f.Rules = append(f.Rules, output.FirewallRule{
 				Name:            rule.Name,
 				SourceIP:        rule.Source,
@@ -85,23 +104,13 @@ func MapErnestIPSaltRules(ips []string) []output.FirewallRule {
 
 	// Allow port 8000 to current ernest instance
 	for _, ip := range ips {
-		/*
-			sw := false
-			for _, rule := range f.Rules {
-				if rule.SourceIP == ip {
-					sw = true
-				}
-			}
-			if sw == false {
-		*/
 		rules = append(rules, output.FirewallRule{
 			SourceIP:        ip,
 			SourcePort:      "any",
-			DestinationIP:   "",
+			DestinationIP:   "$(routers.items.0.ip)",
 			DestinationPort: "8000",
 			Protocol:        "tcp",
 		})
-		//}
 	}
 
 	return rules

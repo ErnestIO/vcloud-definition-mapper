@@ -33,7 +33,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 			DatacenterUsername: "$(datacenters.items.0.username)",
 			DatacenterPassword: "$(datacenters.items.0.password)",
 			DatacenterRegion:   "$(datacenters.items.0.region)",
-			VCloudURL:          "$(datacentes.items.0.vcloud_url)",
+			VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 		})
 	}
 
@@ -58,7 +58,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 				DatacenterUsername: "$(datacenters.items.0.username)",
 				DatacenterPassword: "$(datacenters.items.0.password)",
 				DatacenterRegion:   "$(datacenters.items.0.region)",
-				VCloudURL:          "$(datacentes.items.0.vcloud_url)",
+				VCloudURL:          "$(datacenters.items.0.vcloud_url)",
 			}
 
 			instances = append(instances, newInstance)
