@@ -23,6 +23,8 @@ type FSMMessage struct {
 	ErnestIP      []string `json:"ernest_ip"`
 	ServiceIP     string   `json:"service_ip"`
 	Parent        string   `json:"existing_service"`
+	SaltUser      string   `json:"-"`
+	SaltPass      string   `json:"-"`
 	Workflow      struct {
 		Arcs []graph.Edge `json:"arcs"`
 	} `json:"workflow"`
@@ -426,7 +428,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 
 	if m.Bootstrapping == "salt" {
 		// build new bootstraps
-		m.BootstrapsToCreate.Items = GenerateBootstraps(m.InstancesToCreate.Items)
+		m.BootstrapsToCreate.Items = GenerateBootstraps(m)
 		for _, bootstrap := range om.BootstrapsToCreate.Items {
 			if bootstrap.Status != "completed" {
 				loaded := false
@@ -465,7 +467,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 		for i := range m.BootstrapsToCreate.Items {
 			m.BootstrapsToCreate.Items[i].Status = ""
 		}
-		m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, GenerateBootstrapCleanup(m.InstancesToDelete.Items)...)
+		m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, GenerateBootstrapCleanup(m)...)
 
 		// build new executions
 		for _, execution := range m.Executions.Items {

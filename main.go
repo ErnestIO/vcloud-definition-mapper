@@ -18,11 +18,17 @@ import (
 	"github.com/nats-io/nats"
 )
 
+var c Config
 var nc *nats.Conn
 var natsErr error
 
 func main() {
 	nc = ecc.NewConfig(os.Getenv("NATS_URI")).Nats()
+
+	saltCfg, err := nc.Request("config.get.salt", nil, 1*time.Second)
+	if err == nil {
+		json.Unmarshal(saltCfg.Data, &c.SaltAuthentication)
+	}
 
 	nc.Subscribe("definition.map.creation.vcloud", createDefinitionHandler)
 	nc.Subscribe("definition.map.deletion.vcloud", deleteDefinitionHandler)
@@ -33,7 +39,7 @@ func main() {
 func createDefinitionHandler(msg *nats.Msg) {
 	var om output.FSMMessage
 
-	p, err := definition.PayloadFromJSON(msg.Data)
+	p, err := definition.PayloadFromJSON(msg.Data, c.SaltAuthentication.User, c.SaltAuthentication.Password)
 	if err != nil {
 		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
 		return
@@ -76,7 +82,7 @@ func createDefinitionHandler(msg *nats.Msg) {
 }
 
 func deleteDefinitionHandler(msg *nats.Msg) {
-	p, err := definition.PayloadFromJSON(msg.Data)
+	p, err := definition.PayloadFromJSON(msg.Data, c.SaltAuthentication.User, c.SaltAuthentication.Password)
 	if err != nil {
 		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
 		return
