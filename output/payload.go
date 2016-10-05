@@ -65,16 +65,18 @@ type FSMMessage struct {
 		Items    []Network `json:"items"`
 	} `json:"networks"`
 	NetworksToCreate struct {
-		Started  string    `json:"started"`
-		Finished string    `json:"finished"`
-		Status   string    `json:"status"`
-		Items    []Network `json:"items"`
+		Started              string    `json:"started"`
+		Finished             string    `json:"finished"`
+		Status               string    `json:"status"`
+		Items                []Network `json:"items"`
+		SequentialProcessing bool      `json:"sequential_processing"`
 	} `json:"networks_to_create"`
 	NetworksToDelete struct {
-		Started  string    `json:"started"`
-		Finished string    `json:"finished"`
-		Status   string    `json:"status"`
-		Items    []Network `json:"items"`
+		Started              string    `json:"started"`
+		Finished             string    `json:"finished"`
+		Status               string    `json:"status"`
+		Items                []Network `json:"items"`
+		SequentialProcessing bool      `json:"sequential_processing"`
 	} `json:"networks_to_delete"`
 	Instances struct {
 		Started  string     `json:"started"`
@@ -155,10 +157,11 @@ type FSMMessage struct {
 		Items    []Execution `json:"items"`
 	} `json:"bootstraps"`
 	BootstrapsToCreate struct {
-		Started  string      `json:"started"`
-		Finished string      `json:"finished"`
-		Status   string      `json:"status"`
-		Items    []Execution `json:"items"`
+		Started              string      `json:"started"`
+		Finished             string      `json:"finished"`
+		Status               string      `json:"status"`
+		Items                []Execution `json:"items"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"bootstraps_to_create"`
 	Executions struct {
 		Started  string      `json:"started"`
@@ -167,10 +170,11 @@ type FSMMessage struct {
 		Items    []Execution `json:"items"`
 	} `json:"executions"`
 	ExecutionsToCreate struct {
-		Started  string      `json:"started"`
-		Finished string      `json:"finished"`
-		Status   string      `json:"status"`
-		Items    []Execution `json:"items"`
+		Started              string      `json:"started"`
+		Finished             string      `json:"finished"`
+		Status               string      `json:"status"`
+		Items                []Execution `json:"items"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"executions_to_create"`
 }
 
@@ -212,6 +216,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 	for _, network := range m.Networks.Items {
 		if om.FindNetwork(network.Name) == nil {
 			m.NetworksToCreate.Items = append(m.NetworksToCreate.Items, network)
+			m.NetworksToCreate.SequentialProcessing = true
 		}
 	}
 
@@ -219,6 +224,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 	for _, network := range om.Networks.Items {
 		if m.FindNetwork(network.Name) == nil {
 			m.NetworksToDelete.Items = append(m.NetworksToDelete.Items, network)
+			m.NetworksToDelete.SequentialProcessing = true
 		}
 	}
 
@@ -452,6 +458,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				if len(instances) != 0 {
 					execution.RebuildTarget(instances)
 					m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
+					m.ExecutionsToCreate.SequentialProcessing = true
 				}
 			}
 		}
