@@ -20,6 +20,9 @@ type Definition struct {
 	ServiceIP     string     `json:"service_ip"`
 	Routers       []Router   `json:"routers"`
 	Instances     []Instance `json:"instances"`
+	SaltUser      string     `json:"-"`
+	SaltPass      string     `json:"-"`
+	fake          bool
 }
 
 // New returns a new Definition
@@ -148,4 +151,9 @@ func (d *Definition) FindNetwork(name string) *Network {
 		}
 	}
 	return nil
+}
+
+// IsFake returns whether the service build is fake
+func (d *Definition) IsFake() bool {
+	return d.fake
 }

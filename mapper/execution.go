@@ -23,13 +23,31 @@ func MapExecutions(d definition.Definition) []output.Execution {
 
 		// Itterate over each execution
 		for i, e := range instance.Provisioner {
+			var endpoint string
+			var execType string
+
+			if d.ServiceIP != "" {
+				endpoint = d.ServiceIP
+			} else {
+				endpoint = "$(routers.items.0.ip)"
+			}
+
+			if d.IsFake() {
+				execType = "fake"
+			} else {
+				execType = "salt"
+			}
+
 			// Construct the execution and its payload
 			execs = append(execs, output.Execution{
-				Name:    fmt.Sprintf("Execution %s %s", instance.Name, strconv.Itoa(i+1)),
-				Type:    "salt",
-				Target:  constructTarget(prefix, instance.Count),
-				Payload: strings.Join(e.Commands, "; "),
-				Prefix:  prefix,
+				Name:     fmt.Sprintf("Execution %s %s", instance.Name, strconv.Itoa(i+1)),
+				Type:     execType,
+				Target:   constructTarget(prefix, instance.Count),
+				Payload:  strings.Join(e.Commands, "; "),
+				Prefix:   prefix,
+				EndPoint: endpoint,
+				User:     d.SaltUser,
+				Password: d.SaltPass,
 			})
 		}
 	}

@@ -153,6 +153,10 @@ func TestPayloadDiff(t *testing.T) {
 	Convey("Given a payload that contains executions", t, func() {
 		var m FSMMessage
 		m.Bootstrapping = "salt"
+		m.ServiceIP = "127.0.0.1"
+		m.SaltUser = "user"
+		m.SaltPass = "pass"
+		m.Datacenters.Items = append(m.Datacenters.Items, Datacenter{Type: "vcloud"})
 		m.Instances.Items = testBuildInstances(2)
 		m.Executions.Items = append(m.Executions.Items, testBuildExecution(2))
 
@@ -194,6 +198,10 @@ func TestPayloadDiff(t *testing.T) {
 			Convey("And only the execution payload has changed", func() {
 				var p FSMMessage
 				p.Bootstrapping = "salt"
+				m.ServiceIP = "127.0.0.1"
+				m.SaltUser = "user"
+				m.SaltPass = "pass"
+				m.Datacenters.Items = append(m.Datacenters.Items, Datacenter{Type: "vcloud"})
 				p.Instances.Items = testBuildInstances(2)
 				p.Executions.Items = append(p.Executions.Items, testBuildExecution(2))
 				p.Executions.Items[0].Payload = "uptime"
@@ -212,6 +220,10 @@ func TestPayloadDiff(t *testing.T) {
 			Convey("And instance count has increased but the execution payload is the same", func() {
 				var p FSMMessage
 				p.Bootstrapping = "salt"
+				m.ServiceIP = "127.0.0.1"
+				m.SaltUser = "user"
+				m.SaltPass = "pass"
+				m.Datacenters.Items = append(m.Datacenters.Items, Datacenter{Type: "vcloud"})
 				p.Instances.Items = testBuildInstances(1)
 				p.Executions.Items = append(p.Executions.Items, testBuildExecution(1))
 
@@ -232,6 +244,10 @@ func TestPayloadDiff(t *testing.T) {
 			Convey("And instance count has increased and the execution payload is different", func() {
 				var p FSMMessage
 				p.Bootstrapping = "salt"
+				m.ServiceIP = "127.0.0.1"
+				m.SaltUser = "user"
+				m.SaltPass = "pass"
+				m.Datacenters.Items = append(m.Datacenters.Items, Datacenter{Type: "vcloud"})
 				p.Instances.Items = testBuildInstances(1)
 				p.Executions.Items = append(p.Executions.Items, testBuildExecution(1))
 				p.Executions.Items[0].Payload = "uptime"

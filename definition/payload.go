@@ -19,13 +19,17 @@ type Payload struct {
 }
 
 // PayloadFromJSON returns a definition payload from json
-func PayloadFromJSON(data []byte) (*Payload, error) {
+func PayloadFromJSON(data []byte, saltUser, saltPass string) (*Payload, error) {
 	var p Payload
 
 	err := json.Unmarshal(data, &p)
 	if err != nil {
 		return nil, err
 	}
+
+	p.Service.fake = p.Datacenter.IsFake()
+	p.Service.SaltUser = saltUser
+	p.Service.SaltPass = saltPass
 
 	return &p, nil
 }

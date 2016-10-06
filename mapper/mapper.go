@@ -18,6 +18,8 @@ func ConvertPayload(p *definition.Payload) *output.FSMMessage {
 		ClientName:    p.Client.Name,
 		Type:          p.Datacenter.Type,
 		Bootstrapping: p.Service.Bootstrapping,
+		SaltUser:      p.Service.SaltUser,
+		SaltPass:      p.Service.SaltPass,
 	}
 
 	// Map datacenters

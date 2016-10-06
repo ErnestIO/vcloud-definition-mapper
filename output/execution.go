@@ -11,12 +11,16 @@ import (
 
 // Execution ...
 type Execution struct {
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Target  string `json:"target"`
-	Payload string `json:"payload"`
-	Prefix  string `json:"-"`
-	Status  string `json:"status"`
+	Type     string `json:"type"`
+	Service  string `json:"service"`
+	Name     string `json:"name"`
+	Target   string `json:"target"`
+	Payload  string `json:"payload"`
+	Prefix   string `json:"-"`
+	EndPoint string `json:"service_endpoint"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Status   string `json:"status"`
 }
 
 // HasChanged diff's the two items and returns true if there have been any changes

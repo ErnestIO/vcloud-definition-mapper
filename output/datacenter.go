@@ -4,7 +4,10 @@
 
 package output
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 // Datacenter ...
 type Datacenter struct {
@@ -23,4 +26,9 @@ type Datacenter struct {
 // HasChanged diff's the two items and returns true if there have been any changes
 func (d *Datacenter) HasChanged(od *Datacenter) bool {
 	return !reflect.DeepEqual(*d, *od)
+}
+
+// IsFake determines whether the datacenter is being used for a fake build
+func (d *Datacenter) IsFake() bool {
+	return strings.Contains(d.Type, "fake")
 }

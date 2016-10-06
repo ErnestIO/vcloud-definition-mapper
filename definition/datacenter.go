@@ -6,6 +6,7 @@ package definition
 
 import (
 	"errors"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -34,4 +35,9 @@ func (d *Datacenter) Validate() error {
 		return errors.New("Datacenter name can't be greater than 50 characters")
 	}
 	return nil
+}
+
+// IsFake determines whether the datacenter is being used for a fake build
+func (d *Datacenter) IsFake() bool {
+	return strings.Contains(d.Type, "fake")
 }
