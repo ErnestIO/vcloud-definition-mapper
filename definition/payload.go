@@ -27,10 +27,7 @@ func PayloadFromJSON(data []byte, saltUser, saltPass string) (*Payload, error) {
 		return nil, err
 	}
 
-	if p.Datacenter.Type == "fake" {
-		p.Service.fake = true
-	}
-
+	p.Service.fake = p.Datacenter.IsFake()
 	p.Service.SaltUser = saltUser
 	p.Service.SaltPass = saltPass
 

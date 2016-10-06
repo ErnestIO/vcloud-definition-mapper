@@ -18,7 +18,7 @@ func GenerateBootstraps(m *FSMMessage) []Execution {
 		endpoint = "$(routers.items.0.ip)"
 	}
 
-	if m.Datacenters.Items[0].Type == "fake" {
+	if m.Datacenters.Items[0].IsFake() {
 		execType = "fake"
 	} else {
 		execType = "salt"
@@ -54,7 +54,7 @@ func GenerateBootstrapCleanup(m *FSMMessage) []Execution {
 		endpoint = "$(routers.items.0.ip)"
 	}
 
-	if m.Datacenters.Items[0].Type == "fake" {
+	if m.Datacenters.Items[0].IsFake() {
 		execType = "fake"
 	} else {
 		execType = "salt"
