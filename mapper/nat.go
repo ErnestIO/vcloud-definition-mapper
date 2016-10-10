@@ -52,6 +52,10 @@ func MapNats(d definition.Definition, externalNetwork string) []output.Nat {
 		}
 
 		for _, rule := range r.PortForwarding {
+			if rule.Source == "" {
+				rule.Source = "$(routers.items.0.ip)"
+			}
+
 			n.Rules = append(n.Rules, output.NatRule{
 				Type:            "dnat",
 				OriginIP:        rule.Source,
