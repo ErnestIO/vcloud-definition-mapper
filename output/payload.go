@@ -237,17 +237,17 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 	for _, network := range m.Networks.Items {
 		if om.FindNetwork(network.Name) == nil {
 			m.NetworksToCreate.Items = append(m.NetworksToCreate.Items, network)
-			m.NetworksToCreate.SequentialProcessing = true
 		}
 	}
+	m.NetworksToCreate.SequentialProcessing = true
 
 	// build old networks to delete
 	for _, network := range om.Networks.Items {
 		if m.FindNetwork(network.Name) == nil {
 			m.NetworksToDelete.Items = append(m.NetworksToDelete.Items, network)
-			m.NetworksToDelete.SequentialProcessing = true
 		}
 	}
+	m.NetworksToDelete.SequentialProcessing = true
 
 	// remove items to be created from the base
 	networks := []Network{}
@@ -479,10 +479,10 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 				if len(instances) != 0 {
 					execution.RebuildTarget(instances)
 					m.ExecutionsToCreate.Items = append(m.ExecutionsToCreate.Items, execution)
-					m.ExecutionsToCreate.SequentialProcessing = true
 				}
 			}
 		}
+		m.ExecutionsToCreate.SequentialProcessing = true
 
 		// remove items to be created from the base
 		executions := []Execution{}
