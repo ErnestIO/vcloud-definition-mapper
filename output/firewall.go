@@ -47,6 +47,9 @@ func (f *Firewall) hasChangedDestinationIP(n, o string) bool {
 	if n == "" {
 		return false
 	}
+	if n == "$(routers.items.0.ip)" {
+		return false
+	}
 	if n == o {
 		return false
 	}

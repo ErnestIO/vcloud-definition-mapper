@@ -48,6 +48,9 @@ func (n *Nat) hasChangedIP(ip, oip string) bool {
 	if ip == "" {
 		return false
 	}
+	if ip == "$(routers.items.0.ip)" {
+		return false
+	}
 	if ip == oip {
 		return false
 	}
