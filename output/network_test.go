@@ -27,8 +27,8 @@ func TestNetworkHasChanged(t *testing.T) {
 				DNS:        []string{"8.8.8.8", "8.8.4.4"},
 			}
 			change := n.HasChanged(&on)
-			Convey("Then it should return true", func() {
-				So(change, ShouldBeTrue)
+			Convey("Then it should return false", func() {
+				So(change, ShouldBeFalse)
 			})
 		})
 
