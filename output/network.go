@@ -6,8 +6,8 @@ package output
 
 // Network ...
 type Network struct {
+	Type               string   `json:"_type"`
 	Name               string   `json:"name"`
-	Type               string   `json:"type"`
 	Service            string   `json:"service"`
 	Subnet             string   `json:"range"`
 	Netmask            string   `json:"netmask"`
