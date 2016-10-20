@@ -4,12 +4,10 @@
 
 package output
 
-import "reflect"
-
 // Network ...
 type Network struct {
+	Type               string   `json:"_type"`
 	Name               string   `json:"name"`
-	Type               string   `json:"type"`
 	Service            string   `json:"service"`
 	Subnet             string   `json:"range"`
 	Netmask            string   `json:"netmask"`
@@ -33,16 +31,5 @@ type Network struct {
 
 // HasChanged diff's the two items and returns true if there have been any changes
 func (n *Network) HasChanged(on *Network) bool {
-	if n.Name == on.Name &&
-		n.Type == on.Type &&
-		n.Service == on.Service &&
-		n.Subnet == on.Subnet &&
-		n.Netmask == on.Netmask &&
-		n.StartAddress == on.StartAddress &&
-		n.EndAddress == on.EndAddress &&
-		n.Gateway == on.Gateway &&
-		reflect.DeepEqual(n.DNS, on.DNS) {
-		return false
-	}
-	return true
+	return false
 }
