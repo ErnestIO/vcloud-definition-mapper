@@ -11,6 +11,7 @@ import (
 
 // Instance ...
 type Instance struct {
+	ProviderType       string         `json:"_type"`
 	Name               string         `json:"name"`
 	Catalog            string         `json:"reference_catalog"`
 	Image              string         `json:"reference_image"`
@@ -19,7 +20,6 @@ type Instance struct {
 	NetworkName        string         `json:"network_name"`
 	IP                 net.IP         `json:"ip"`
 	Disks              []InstanceDisk `json:"disks"`
-	ClientName         string         `json:"client_name"`
 	DatacenterType     string         `json:"datacenter_type"`
 	DatacenterName     string         `json:"datacenter_name"`
 	DatacenterUsername string         `json:"datacenter_username"`
