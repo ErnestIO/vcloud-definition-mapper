@@ -6,5 +6,6 @@ package definition
 
 // Exec ...
 type Exec struct {
+	Shell    []string `json:"shell"`
 	Commands []string `json:"exec"`
 }
