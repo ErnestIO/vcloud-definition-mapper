@@ -20,6 +20,7 @@ type Instance struct {
 	NetworkName        string         `json:"network_name"`
 	IP                 net.IP         `json:"ip"`
 	Disks              []InstanceDisk `json:"disks"`
+	ShellCommands      []string       `json:"shell_commands"`
 	DatacenterType     string         `json:"datacenter_type"`
 	DatacenterName     string         `json:"datacenter_name"`
 	DatacenterUsername string         `json:"datacenter_username"`

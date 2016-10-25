@@ -43,13 +43,25 @@ func MapInstances(d definition.Definition) []output.Instance {
 		memory, _ := binaryprefix.GetMB(instance.Memory)
 
 		for i := 0; i < instance.Count; i++ {
+			var disks []output.InstanceDisk
+
+			if instance.RootDisk != "" {
+				size, _ := binaryprefix.GetMB(instance.RootDisk)
+				disks = append(disks, output.InstanceDisk{
+					ID:   0,
+					Size: size,
+				})
+			}
+
+			disks = append(disks, MapInstanceDisks(instance.Disks)...)
+
 			newInstance := output.Instance{
 				Name:               d.GeneratedName() + instance.Name + "-" + strconv.Itoa(i+1),
 				Catalog:            instance.Catalog(),
 				Image:              instance.Template(),
 				Cpus:               instance.Cpus,
 				Memory:             memory,
-				Disks:              MapInstanceDisks(instance.Disks),
+				Disks:              disks,
 				NetworkName:        generateNetworkName(&d, instance.Networks.Name),
 				IP:                 net.ParseIP(ip.String()),
 				ProviderType:       "$(datacenters.items.0.type)",

@@ -20,6 +20,7 @@ type Instance struct {
 	Cpus        int              `json:"cpus"`
 	Image       string           `json:"image"`
 	Memory      string           `json:"memory"`
+	RootDisk    string           `json:"root_disk"`
 	Disks       []string         `json:"disks"`
 	Name        string           `json:"name"`
 	Networks    InstanceNetworks `json:"networks"`
@@ -76,6 +77,20 @@ func (i *Instance) Validate(network *Network) error {
 	_, err := binaryprefix.GetMB(i.Memory)
 	if err != nil {
 		return errors.New("Invalid memory format")
+	}
+
+	if i.RootDisk != "" {
+		_, err := binaryprefix.GetMB(i.RootDisk)
+		if err != nil {
+			return errors.New("Invalid root disk size")
+		}
+	}
+
+	for _, disk := range i.Disks {
+		_, err := binaryprefix.GetMB(disk)
+		if err != nil {
+			return errors.New("Invalid disk size")
+		}
 	}
 
 	// Validate IP addresses
