@@ -53,6 +53,7 @@ func MapNetworks(d definition.Definition) []output.Network {
 
 			n := output.Network{
 				Name:               d.GeneratedName() + network.Name,
+				Type:               "$(datacenters.items.0.type)",
 				Subnet:             network.Subnet,
 				StartAddress:       octets + ".5",
 				EndAddress:         octets + ".250",
