@@ -20,10 +20,10 @@ func MapFirewalls(d definition.Definition) []output.Firewall {
 
 		f := output.Firewall{
 			Name:               d.GeneratedName() + r.Name,
+			ProviderType:       "$(datacenters.items.0.type)",
 			RouterName:         "$(routers.items.0.name)",
 			RouterType:         "$(routers.items.0.type)",
 			RouterIP:           "$(routers.items.0.ip)",
-			ClientName:         "$(client_name)",
 			DatacenterType:     "$(datacenters.items.0.type)",
 			DatacenterName:     "$(datacenters.items.0.name)",
 			DatacenterUsername: "$(datacenters.items.0.username)",

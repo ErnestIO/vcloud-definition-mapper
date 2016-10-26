@@ -6,10 +6,10 @@ package output
 
 // Firewall ...
 type Firewall struct {
+	ProviderType       string         `json:"_type"`
 	Name               string         `json:"name"`
 	RouterName         string         `json:"router_name"`
 	Rules              []FirewallRule `json:"rules"`
-	ClientName         string         `json:"client_name"`
 	RouterType         string         `json:"router_type"`
 	RouterIP           string         `json:"router_ip"`
 	DatacenterName     string         `json:"datacenter_name"`
@@ -44,14 +44,9 @@ func (f *Firewall) HasChanged(of *Firewall) bool {
 func (f *Firewall) hasChangedDestinationIP(n, o string) bool {
 	// In case the destination ip is empty it won't be empty on the previous
 	// build as it's internally replaced by the endpoint
-	if n == "" {
+	if n == "" || n == "$(routers.items.0.ip)" || n == o {
 		return false
 	}
-	if n == "$(routers.items.0.ip)" {
-		return false
-	}
-	if n == o {
-		return false
-	}
+
 	return true
 }
