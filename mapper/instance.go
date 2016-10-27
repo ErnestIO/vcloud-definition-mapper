@@ -42,6 +42,14 @@ func MapInstances(d definition.Definition) []output.Instance {
 		copy(ip, instance.Networks.StartIP.To4())
 		memory, _ := binaryprefix.GetMB(instance.Memory)
 
+		var commands []string
+
+		for _, prov := range instance.Provisioner {
+			if len(prov.Shell) > 0 {
+				commands = prov.Shell
+			}
+		}
+
 		for i := 0; i < instance.Count; i++ {
 			var disks []output.InstanceDisk
 
@@ -64,6 +72,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 				Disks:              disks,
 				NetworkName:        generateNetworkName(&d, instance.Networks.Name),
 				IP:                 net.ParseIP(ip.String()),
+				ShellCommands:      commands,
 				ProviderType:       "$(datacenters.items.0.type)",
 				DatacenterType:     "$(datacenters.items.0.type)",
 				DatacenterName:     "$(datacenters.items.0.name)",
