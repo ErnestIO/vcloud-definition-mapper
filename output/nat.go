@@ -6,6 +6,7 @@ package output
 
 // Nat ...
 type Nat struct {
+	ProviderType       string    `json:"_type"`
 	Name               string    `json:"name"`
 	Rules              []NatRule `json:"rules"`
 	ClientName         string    `json:"client_name"`
