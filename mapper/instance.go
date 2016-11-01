@@ -20,6 +20,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 	if d.IsSaltBootstrapped() {
 		instances = append(instances, output.Instance{
 			Name:               d.GeneratedName() + "salt-master",
+			Hostname:           "salt-master",
 			Catalog:            "r3",
 			Image:              "r3-salt-master",
 			Cpus:               1,
@@ -65,6 +66,7 @@ func MapInstances(d definition.Definition) []output.Instance {
 
 			newInstance := output.Instance{
 				Name:               d.GeneratedName() + instance.Name + "-" + strconv.Itoa(i+1),
+				Hostname:           instance.Name + "-" + strconv.Itoa(i+1),
 				Catalog:            instance.Catalog(),
 				Image:              instance.Template(),
 				Cpus:               instance.Cpus,
