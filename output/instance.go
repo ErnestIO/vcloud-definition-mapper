@@ -13,6 +13,7 @@ import (
 type Instance struct {
 	ProviderType       string         `json:"_type"`
 	Name               string         `json:"name"`
+	Hostname           string         `json:"hostname"`
 	Catalog            string         `json:"reference_catalog"`
 	Image              string         `json:"reference_image"`
 	Cpus               int            `json:"cpus"`
@@ -40,6 +41,7 @@ type InstanceDisk struct {
 // HasChanged diff's the two items and returns true if there have been any changes
 func (i *Instance) HasChanged(oi *Instance) bool {
 	if i.Name == oi.Name &&
+		i.Hostname == oi.Hostname &&
 		i.Catalog == oi.Catalog &&
 		i.Image == oi.Image &&
 		i.Cpus == oi.Cpus &&

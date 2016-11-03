@@ -79,6 +79,7 @@ func TestInstancesMapping(t *testing.T) {
 				Convey("Then defined instances should be mapped", func() {
 					So(len(i), ShouldEqual, 1)
 					So(i[0].Name, ShouldEqual, "datacenter-service-foo-1")
+					So(i[0].Hostname, ShouldEqual, "foo-1")
 					So(i[0].Catalog, ShouldEqual, "catalog")
 					So(i[0].Image, ShouldEqual, "image")
 					So(i[0].Cpus, ShouldEqual, 1)
