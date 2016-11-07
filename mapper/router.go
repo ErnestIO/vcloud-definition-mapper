@@ -10,15 +10,14 @@ import (
 )
 
 // MapRouters : Maps input router to an ernest formatted router
-func MapRouters(d definition.Definition, rtype string) []output.Router {
+func MapRouters(d definition.Definition) []output.Router {
 	var routers []output.Router
 
 	for _, router := range d.Routers {
 		r := output.Router{
+			ProviderType:       `$(datacenters.items.0.type)`,
 			Name:               router.Name,
-			Type:               rtype,
 			IP:                 d.ServiceIP,
-			ClientName:         `$(client_name)`,
 			DatacenterName:     `$(datacenters.items.0.name)`,
 			DatacenterPassword: `$(datacenters.items.0.password)`,
 			DatacenterRegion:   `$(datacenters.items.0.region)`,
