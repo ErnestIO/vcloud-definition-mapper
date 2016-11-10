@@ -1,15 +1,49 @@
 machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+    - touch /tmp/ernest.log && chmod 666 /tmp/ernest.log
   services:
     - docker
   environment:
     NATS_URI:  nats://127.0.0.1:4222
+    NATS_URI_TEST:  nats://127.0.0.1:4222
+    GOBIN: /home/ubuntu/.go_workspace/bin
+    CURRENT_INSTANCE: http://ernest.local:80/
+    JWT_SECRET: test
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+    ERNEST_LOG_FILE: '/tmp/ernest.log'
+    ERNEST_APPLY_DELAY: 1
+
+  hosts:
+    ernest.local: 127.0.0.1
 
 dependencies:
-  pre:
-    - docker run -d -p 4222:4222 nats
-    - make deps
+  override:
+    - touch $ERNEST_LOG_FILE && chmod 777 $ERNEST_LOG_FILE
+    - mkdir -p "$GOPATH/src/$IMPORT_PATH"
+    - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
+    - make dev-deps
+    - ./integration/ci_install_service.sh r3labs natsc master
+    - ./integration/ci_install_service.sh r3labs composable master
+    - ./integration/ci_install_service.sh ernestio ernest-cli develop
+    - sudo pip install docker-compose
+    - mkdir /tmp/composable
+    - composable gen ./integration/definition.yml ./integration/template.yml
+    - docker-compose -f docker-compose.yml up -d
+    - docker-compose logs > /tmp/compose.log:
+          background: true
+    - mkdir -p /home/ubuntu/.go_workspace/src/github.com/ernestio/
+    - rm -rf /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper
+    - cp -R /home/ubuntu/vcloud-definition-mapper /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper
+    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper/ && make install
+    - vcloud-definition-mapper > /tmp/vcloud-definition-mapper.log:
+          background: true
+    - /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper/integration/ci_setup.sh
+    - /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper/integration/ci_install_service.sh r3labs natsc master
+    - /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper/integration/ci_install_service.sh r3labs composable master
 
 test:
   override:
-    - make test
-    - make lint
+    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper && make test
+    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/vcloud-definition-mapper && make lint
+
