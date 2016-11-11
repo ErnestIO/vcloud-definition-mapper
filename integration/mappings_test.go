@@ -114,9 +114,8 @@ type natEvent struct {
 
 type routerEvent struct {
 	Service            string `json:"service_id"`
-	Type               string `json:"type"`
-	RouterName         string `json:"router_name"`
-	RouterType         string `json:"router_type"`
+	RouterName         string `json:"name"`
+	RouterType         string `json:"_type"`
 	ClientName         string `json:"client_name"`
 	DatacenterName     string `json:"datacenter_name"`
 	DatacenterUsername string `json:"datacenter_username"`
