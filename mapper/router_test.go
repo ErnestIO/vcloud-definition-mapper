@@ -19,11 +19,10 @@ func TestRouterMapping(t *testing.T) {
 			Name: "foo",
 		})
 		Convey("When I map routers", func() {
-			r := MapRouters(d, "vcloud")
+			r := MapRouters(d)
 			Convey("Then it shouldsuccessfully map an output router", func() {
 				So(len(r), ShouldEqual, 1)
 				So(r[0].Name, ShouldEqual, "foo")
-				So(r[0].Type, ShouldEqual, "vcloud")
 			})
 		})
 	})

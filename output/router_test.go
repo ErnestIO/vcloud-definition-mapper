@@ -13,16 +13,16 @@ import (
 func TestRouterHasChanged(t *testing.T) {
 	Convey("Given a router", t, func() {
 		r := Router{
-			Name: "foo",
-			Type: "vcloud",
-			IP:   "10.0.0.1",
+			Name:         "foo",
+			ProviderType: "vcloud",
+			IP:           "10.0.0.1",
 		}
 
 		Convey("When I compare it to an changed router", func() {
 			or := Router{
-				Name: "foo",
-				Type: "vcloud",
-				IP:   "10.0.0.100",
+				Name:         "foo",
+				ProviderType: "vcloud",
+				IP:           "10.0.0.100",
 			}
 			change := r.HasChanged(&or)
 			Convey("Then it should return true", func() {
@@ -32,9 +32,9 @@ func TestRouterHasChanged(t *testing.T) {
 
 		Convey("When I compare it to an identical router", func() {
 			or := Router{
-				Name: "foo",
-				Type: "vcloud",
-				IP:   "10.0.0.1",
+				Name:         "foo",
+				ProviderType: "vcloud",
+				IP:           "10.0.0.1",
 			}
 			change := r.HasChanged(&or)
 			Convey("Then it should return false", func() {

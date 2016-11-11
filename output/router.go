@@ -6,10 +6,9 @@ package output
 
 // Router ...
 type Router struct {
+	ProviderType       string `json:"_type"`
 	Name               string `json:"name"`
-	Type               string `json:"type"`
 	IP                 string `json:"ip"`
-	ClientName         string `json:"client_name"`
 	DatacenterName     string `json:"datacenter_name"`
 	DatacenterPassword string `json:"datacenter_password"`
 	DatacenterRegion   string `json:"datacenter_region"`
@@ -24,7 +23,6 @@ type Router struct {
 // HasChanged diff's the two items and returns true if there have been any changes
 func (r *Router) HasChanged(or *Router) bool {
 	if r.Name == or.Name &&
-		r.Type == or.Type &&
 		r.IP == or.IP {
 		return false
 	}
