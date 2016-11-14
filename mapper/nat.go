@@ -24,7 +24,7 @@ func MapNats(d definition.Definition, externalNetwork string) []output.Nat {
 			Name:               d.GeneratedName() + r.Name,
 			ProviderType:       "$(datacenters.items.0.type)",
 			RouterName:         "$(routers.items.0.name)",
-			RouterType:         "$(routers.items.0.type)",
+			RouterType:         "$(routers.items.0._type)",
 			RouterIP:           "$(routers.items.0.ip)",
 			ClientName:         "$(client_name)",
 			DatacenterType:     "$(datacenters.items.0.type)",

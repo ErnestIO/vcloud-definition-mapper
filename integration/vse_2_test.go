@@ -73,8 +73,6 @@ func Test2VSE(t *testing.T) {
 				So(r.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(r.RouterName, ShouldEqual, "vse5")
 				So(r.RouterType, ShouldEqual, "vcloud-fake")
-				So(r.Service, ShouldNotEqual, "")
-				So(r.ClientName, ShouldNotEqual, "")
 				So(r.VCloudURL, ShouldNotEqual, "")
 				So(r.VseURL, ShouldNotEqual, "")
 				So(r.Status, ShouldEqual, "processing")
