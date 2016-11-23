@@ -175,7 +175,7 @@ type awsInstanceEvent struct {
 	InstanceType          string   `json:"instance_type"`
 	Status                string   `json:"status"`
 	ErrorCode             string   `json:"error_code"`
-	ErrorMessage          string   `json:"error_message"`
+	ErrorMessage          string   `json:"error"`
 }
 
 type awsNetworkEvent struct {
@@ -215,7 +215,7 @@ type awsFirewallEvent struct {
 	} `json:"rules"`
 	Status       string `json:"status"`
 	ErrorCode    string `json:"error_code"`
-	ErrorMessage string `json:"error_message"`
+	ErrorMessage string `json:"error"`
 }
 
 type awsNatEvent struct {
@@ -233,7 +233,7 @@ type awsNatEvent struct {
 	RoutedNetworkAWSIDs   []string `json:"routed_networks_aws_ids"`
 	Status                string   `json:"status"`
 	ErrorCode             string   `json:"error_code"`
-	ErrorMessage          string   `json:"error_message"`
+	ErrorMessage          string   `json:"error"`
 }
 
 type awsELBListener struct {
@@ -266,7 +266,7 @@ type awsELBEvent struct {
 	Service             string           `json:"service"`
 	Status              string           `json:"status"`
 	ErrorCode           string           `json:"error_code"`
-	ErrorMessage        string           `json:"error_message"`
+	ErrorMessage        string           `json:"error"`
 }
 
 type awsS3Event struct {
