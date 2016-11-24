@@ -103,6 +103,7 @@ func deleteDefinitionHandler(msg *nats.Msg) {
 	for i := range m.NetworksToDelete.Items {
 		m.NetworksToDelete.Items[i].Status = ""
 	}
+	m.NetworksToDelete.SequentialProcessing = true
 	m.InstancesToDelete = m.Instances
 	for i := range m.InstancesToDelete.Items {
 		m.InstancesToDelete.Items[i].Status = ""
