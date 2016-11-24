@@ -303,6 +303,7 @@ func (m *FSMMessage) Diff(om FSMMessage) {
 	for i := range m.InstancesToUpdate.Items {
 		m.InstancesToUpdate.Items[i].Status = ""
 	}
+	m.InstancesToUpdate.SequentialProcessing = true
 
 	// remove items to be created from the base
 	instances := []Instance{}
