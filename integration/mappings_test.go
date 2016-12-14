@@ -165,8 +165,8 @@ type awsInstanceEvent struct {
 	BatchID               string   `json:"_batch_id"`
 	Type                  string   `json:"_type"`
 	DatacenterRegion      string   `json:"datacenter_region,omitempty"`
-	DatacenterAccessToken string   `json:"datacenter_token,omitempty"`
-	DatacenterAccessKey   string   `json:"datacenter_secret,omitempty"`
+	DatacenterAccessToken string   `json:"aws_access_key_id,omitempty"`
+	DatacenterAccessKey   string   `json:"aws_secret_access_key,omitempty"`
 	DatacenterVpcID       string   `json:"vpc_id,omitempty"`
 	NetworkAWSID          string   `json:"network_aws_id"`
 	SecurityGroupAWSIDs   []string `json:"security_group_aws_ids"`
@@ -184,8 +184,8 @@ type awsNetworkEvent struct {
 	Type                  string `json:"_type"`
 	Service               string `json:"service"`
 	DatacenterRegion      string `json:"datacenter_region,omitempty"`
-	DatacenterAccessToken string `json:"datacenter_token,omitempty"`
-	DatacenterAccessKey   string `json:"datacenter_secret,omitempty"`
+	DatacenterAccessToken string `json:"aws_access_key_id,omitempty"`
+	DatacenterAccessKey   string `json:"aws_secret_access_key,omitempty"`
 	DatacenterVpcID       string `json:"vpc_id,omitempty"`
 	NetworkType           string `json:"network_type"`
 	NetworkSubnet         string `json:"range"`
@@ -205,8 +205,8 @@ type awsFirewallEvent struct {
 	BatchID               string `json:"_batch_id"`
 	Type                  string `json:"_type"`
 	DatacenterRegion      string `json:"datacenter_region"`
-	DatacenterAccessToken string `json:"datacenter_token"`
-	DatacenterAccessKey   string `json:"datacenter_secret"`
+	DatacenterAccessToken string `json:"aws_access_key_id"`
+	DatacenterAccessKey   string `json:"aws_secret_access_key"`
 	DatacenterVPCID       string `json:"vpc_id"`
 	SecurityGroupName     string `json:"name"`
 	SecurityGroupRules    struct {
@@ -223,8 +223,8 @@ type awsNatEvent struct {
 	BatchID               string   `json:"_batch_id"`
 	Type                  string   `json:"_type"`
 	DatacenterRegion      string   `json:"datacenter_region"`
-	DatacenterAccessToken string   `json:"datacenter_token"`
-	DatacenterAccessKey   string   `json:"datacenter_secret"`
+	DatacenterAccessToken string   `json:"aws_access_key_id"`
+	DatacenterAccessKey   string   `json:"aws_secret_access_key"`
 	DatacenterVPCID       string   `json:"vpc_id"`
 	NatGatewayAWSID       string   `json:"nat_gateway_aws_id"`
 	PublicNetwork         string   `json:"public_network"`
@@ -260,8 +260,8 @@ type awsELBEvent struct {
 	DatacenterType      string           `json:"datacenter_type,omitempty"`
 	DatacenterName      string           `json:"datacenter_name,omitempty"`
 	DatacenterRegion    string           `json:"datacenter_region"`
-	DatacenterToken     string           `json:"datacenter_token"`
-	DatacenterSecret    string           `json:"datacenter_secret"`
+	DatacenterToken     string           `json:"aws_access_key_id"`
+	DatacenterSecret    string           `json:"aws_secret_access_key"`
 	VpcID               string           `json:"vpc_id"`
 	Service             string           `json:"service"`
 	Status              string           `json:"status"`
