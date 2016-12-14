@@ -27,11 +27,11 @@ func main() {
 
 	saltCfg, err := nc.Request("config.get.salt", nil, 1*time.Second)
 	if err == nil {
-		json.Unmarshal(saltCfg.Data, &c.SaltAuthentication)
+		_ = json.Unmarshal(saltCfg.Data, &c.SaltAuthentication)
 	}
 
-	nc.Subscribe("definition.map.creation.vcloud", createDefinitionHandler)
-	nc.Subscribe("definition.map.deletion.vcloud", deleteDefinitionHandler)
+	_, _ = nc.Subscribe("definition.map.creation.vcloud", createDefinitionHandler)
+	_, _ = nc.Subscribe("definition.map.deletion.vcloud", deleteDefinitionHandler)
 
 	runtime.Goexit()
 }
@@ -41,13 +41,13 @@ func createDefinitionHandler(msg *nats.Msg) {
 
 	p, err := definition.PayloadFromJSON(msg.Data, c.SaltAuthentication.User, c.SaltAuthentication.Password)
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
 		return
 	}
 
 	err = p.Service.Validate()
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"`+err.Error()+`"}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"`+err.Error()+`"}`))
 		return
 	}
 
@@ -58,7 +58,7 @@ func createDefinitionHandler(msg *nats.Msg) {
 	if p.PrevID != "" {
 		om, err = getPreviousService(p.PrevID)
 		if err != nil {
-			nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
+			_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
 			return
 		}
 	}
@@ -68,29 +68,29 @@ func createDefinitionHandler(msg *nats.Msg) {
 	err = m.GenerateWorkflow("create-workflow.json")
 	if err != nil {
 		log.Println(err.Error())
-		nc.Publish(msg.Reply, []byte(`{"error":"Could not generate workflow."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Could not generate workflow."}`))
 		return
 	}
 
 	data, err := json.Marshal(m)
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
 		return
 	}
 
-	nc.Publish(msg.Reply, data)
+	_ = nc.Publish(msg.Reply, data)
 }
 
 func deleteDefinitionHandler(msg *nats.Msg) {
 	p, err := definition.PayloadFromJSON(msg.Data, c.SaltAuthentication.User, c.SaltAuthentication.Password)
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed to parse payload."}`))
 		return
 	}
 
 	m, err := getPreviousService(p.PrevID)
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed to get previous output."}`))
 		return
 	}
 
@@ -118,15 +118,15 @@ func deleteDefinitionHandler(msg *nats.Msg) {
 	}
 
 	// Generate delete workflow
-	m.GenerateWorkflow("delete-workflow.json")
+	_ = m.GenerateWorkflow("delete-workflow.json")
 
 	data, err := json.Marshal(m)
 	if err != nil {
-		nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
+		_ = nc.Publish(msg.Reply, []byte(`{"error":"Failed marshal output message."}`))
 		return
 	}
 
-	nc.Publish(msg.Reply, data)
+	_ = nc.Publish(msg.Reply, data)
 }
 
 func getPreviousService(id string) (output.FSMMessage, error) {

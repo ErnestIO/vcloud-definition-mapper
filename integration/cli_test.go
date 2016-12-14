@@ -27,12 +27,12 @@ var salt struct {
 	Password string `json:"password"`
 }
 
-var admin_usr = "ci_admin"
-var admin_pwd = "pwd"
-var default_usr = "usr"
-var default_pwd = "pwd"
-var default_org = "org"
-var ernest_instance = "https://ernest.local/"
+var adminUsr = "ci_admin"
+var adminPwd = "pwd"
+var defaultUsr = "usr"
+var defaultPwd = "pwd"
+var defaultOrg = "org"
+var ernestInstance = "https://ernest.local/"
 var endSub = make(chan *nats.Msg, 1)
 
 var setup = false
@@ -62,8 +62,8 @@ func waitMsg(ch chan *nats.Msg) (*nats.Msg, error) {
 
 func waitToDone() {
 	subEnd, _ := n.ChanSubscribe("service.create.done", endSub)
-	waitMsg(endSub)
-	subEnd.Unsubscribe()
+	_, _ = waitMsg(endSub)
+	_ = subEnd.Unsubscribe()
 }
 
 func getDefinitionPath(def string, service string) string {
@@ -142,25 +142,25 @@ func basicSetup(provider string) {
 		if err != nil {
 			panic("Salt config not accessible")
 		}
-		json.Unmarshal(msg.Data, &salt)
+		_ = json.Unmarshal(msg.Data, &salt)
 
 		if os.Getenv("CURRENT_INSTANCE") != "" {
-			ernest_instance = os.Getenv("CURRENT_INSTANCE")
+			ernestInstance = os.Getenv("CURRENT_INSTANCE")
 		}
-		ernest("target", ernest_instance)
-		ernest("login", "--user", admin_usr, "--password", admin_pwd)
+		_, _ = ernest("target", ernestInstance)
+		_, _ = ernest("login", "--user", adminUsr, "--password", adminPwd)
 
 		// Create user
-		ernest("user", "create", default_usr, default_pwd)
-		ernest("group", "create", "test")
-		ernest("group", "add-user", default_usr, "test")
+		_, _ = ernest("user", "create", defaultUsr, defaultPwd)
+		_, _ = ernest("group", "create", "test")
+		_, _ = ernest("group", "add-user", defaultUsr, "test")
 
 		// Login as this user
 		login()
 
 		// Create a datacenter
-		ernest("datacenter", "create", "vcloud", "fake", "--vcloud-url", "https://myvdc.me.com", "--fake", "--user", default_usr, "--password", default_pwd, "--org", default_org, "--vse-url", "http://localhost", "--public-network", "NETWORK")
-		ernest("datacenter", "create", "aws", "fakeaws", "--region", "fake", "--secret_access_key", "fake_up_to_16_chars", "--access_key_id", "secret_up_to_16_chars", "--fake")
+		_, _ = ernest("datacenter", "create", "vcloud", "fake", "--vcloud-url", "https://myvdc.me.com", "--fake", "--user", defaultUsr, "--password", defaultPwd, "--org", defaultOrg, "--vse-url", "http://localhost", "--public-network", "NETWORK")
+		_, _ = ernest("datacenter", "create", "aws", "fakeaws", "--region", "fake", "--secret_access_key", "fake_up_to_16_chars", "--access_key_id", "secret_up_to_16_chars", "--fake")
 
 		setup = true
 	} else {
@@ -170,7 +170,7 @@ func basicSetup(provider string) {
 }
 
 func login() {
-	ernest("login", "--user", default_usr, "--password", default_pwd)
+	_, _ = ernest("login", "--user", defaultUsr, "--password", defaultPwd)
 }
 
 func deleteConfig() {

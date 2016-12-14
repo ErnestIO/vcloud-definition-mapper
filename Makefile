@@ -5,8 +5,7 @@ build:
 	go build -v ./...
 
 lint:
-	golint ./...
-	go vet ./...
+	gometalinter --config .linter.conf
 
 test:
 	go test -v ./... --cover
@@ -19,8 +18,12 @@ deps:
 	go get github.com/ernestio/ernest-config-client
 
 dev-deps: deps
-	go get github.com/golang/lint/golint
+	go get golang.org/x/crypto/pbkdf2
+	go get github.com/ernestio/crypto
+	go get github.com/ernestio/crypto/aes
 	go get github.com/smartystreets/goconvey/convey
+	go get github.com/alecthomas/gometalinter
+	gometalinter --install
 
 clean:
 	go clean

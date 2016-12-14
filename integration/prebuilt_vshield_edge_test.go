@@ -8,15 +8,22 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"testing"
 
+	aes "github.com/ernestio/crypto/aes"
 	"github.com/nats-io/nats"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestPreVSE(t *testing.T) {
 	var service = "novse"
+	var encryptedPwd string
+	var encryptedUsr string
+
+	crypto := aes.New()
+	key := os.Getenv("ERNEST_CRYPTO_KEY")
 
 	service2 := service + "II" + strconv.Itoa(rand.Intn(1000))
 	service = service + strconv.Itoa(rand.Intn(1000))
@@ -52,25 +59,27 @@ func TestPreVSE(t *testing.T) {
 				n := networkEvent{}
 				msg, err := waitMsg(nwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &n)
+				_ = json.Unmarshal(msg.Data, &n)
 				i := instanceEvent{}
 				msg, err = waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				f := firewallEvent{}
 				msg, err = waitMsg(fwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &f)
+				_ = json.Unmarshal(msg.Data, &f)
 				na := natEvent{}
 				msg, err = waitMsg(ntCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &na)
+				_ = json.Unmarshal(msg.Data, &na)
 
 				Info("And I should receive a valid network.create.vcloud-fake", " ", 8)
 				So(n.DatacenterName, ShouldEqual, "fake")
-				So(n.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(n.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(n.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(n.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(n.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(n.NetworkName, ShouldEqual, "fake-"+service+"-web")
 				So(n.NetworkGateway, ShouldEqual, "10.1.0.1")
 				So(n.NetworkNetmask, ShouldEqual, "255.255.255.0")
@@ -79,10 +88,12 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-web-1")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -98,33 +109,35 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid firewall.create.vcloud-fake", " ", 8)
 				So(f.DatacenterName, ShouldEqual, "fake")
-				So(f.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(f.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(f.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(f.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(f.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(f.Type, ShouldEqual, "vcloud-fake")
 				So(f.RouterIP, ShouldEqual, "172.16.186.44")
 				So(f.RouterName, ShouldEqual, "vse2")
 				So(f.RouterType, ShouldEqual, "vcloud-fake")
 				So(len(f.Rules), ShouldEqual, 4)
-				Printf("\n        And it will allow internal:any to internal:any ")
+				_, _ = Printf("\n        And it will allow internal:any to internal:any ")
 				So(f.Rules[0].SourcePort, ShouldEqual, "any")
 				So(f.Rules[0].SourceIP, ShouldEqual, "internal")
 				So(f.Rules[0].DestinationIP, ShouldEqual, "internal")
 				So(f.Rules[0].DestinationPort, ShouldEqual, "any")
 				So(f.Rules[0].Protocol, ShouldEqual, "any")
-				Printf("\n        And it will allow 172.18.143.3:any to internal:22 ")
+				_, _ = Printf("\n        And it will allow 172.18.143.3:any to internal:22 ")
 				So(f.Rules[1].SourcePort, ShouldEqual, "any")
 				So(f.Rules[1].SourceIP, ShouldEqual, "172.18.143.3")
 				So(f.Rules[1].DestinationIP, ShouldEqual, "internal")
 				So(f.Rules[1].DestinationPort, ShouldEqual, "22")
 				So(f.Rules[1].Protocol, ShouldEqual, "tcp")
-				Printf("\n        And it will allow 172.17.240.0/24:any to internal:22 ")
+				_, _ = Printf("\n        And it will allow 172.17.240.0/24:any to internal:22 ")
 				So(f.Rules[2].SourcePort, ShouldEqual, "any")
 				So(f.Rules[2].SourceIP, ShouldEqual, "172.17.240.0/24")
 				So(f.Rules[2].DestinationIP, ShouldEqual, "internal")
 				So(f.Rules[2].DestinationPort, ShouldEqual, "22")
 				So(f.Rules[2].Protocol, ShouldEqual, "tcp")
-				Printf("\n        And it will allow 172.19.186.30/24:any to internal:22 ")
+				_, _ = Printf("\n        And it will allow 172.19.186.30/24:any to internal:22 ")
 				So(f.Rules[3].SourcePort, ShouldEqual, "any")
 				So(f.Rules[3].SourceIP, ShouldEqual, "172.19.186.30")
 				So(f.Rules[3].DestinationIP, ShouldEqual, "internal")
@@ -133,10 +146,12 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid nat.create.vcloud-fake", " ", 8)
 				So(na.DatacenterName, ShouldEqual, "fake")
-				So(na.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(na.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(na.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(na.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(na.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(na.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(na.NatName, ShouldEqual, "fake-"+service+"-vse2")
 				So(len(na.NatRules), ShouldEqual, 2)
 				So(na.NatRules[0].Network, ShouldEqual, "NETWORK")
@@ -151,10 +166,10 @@ func TestPreVSE(t *testing.T) {
 				So(na.RouterType, ShouldEqual, "vcloud-fake")
 			})
 
-			nsub.Unsubscribe()
-			isub.Unsubscribe()
-			fsub.Unsubscribe()
-			asub.Unsubscribe()
+			_ = nsub.Unsubscribe()
+			_ = isub.Unsubscribe()
+			_ = fsub.Unsubscribe()
+			_ = asub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse2.yml definition", func() {
@@ -172,17 +187,19 @@ func TestPreVSE(t *testing.T) {
 				event := firewallEvent{}
 				msg, err := waitMsg(fwUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.Type, ShouldEqual, "vcloud-fake")
 				So(event.RouterIP, ShouldEqual, "172.16.186.44")
 				So(event.RouterName, ShouldEqual, "vse2")
 				So(event.RouterType, ShouldEqual, "vcloud-fake")
 				So(len(event.Rules), ShouldEqual, 5)
-				Printf("\n        And it will allow internal:any to external:any ")
+				_, _ = Printf("\n        And it will allow internal:any to external:any ")
 				So(event.Rules[4].SourcePort, ShouldEqual, "any")
 				So(event.Rules[4].SourceIP, ShouldEqual, "172.19.186.30")
 				So(event.Rules[4].DestinationIP, ShouldEqual, "internal")
@@ -190,7 +207,7 @@ func TestPreVSE(t *testing.T) {
 				So(event.Rules[4].Protocol, ShouldEqual, "tcp")
 			})
 
-			fsub.Unsubscribe()
+			_ = fsub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse3.yml definition", func() {
@@ -208,17 +225,19 @@ func TestPreVSE(t *testing.T) {
 				event := natEvent{}
 				msg, err := waitMsg(ntUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.RouterIP, ShouldEqual, "172.16.186.44")
 				So(event.RouterName, ShouldEqual, "vse2")
 				So(event.RouterType, ShouldEqual, "vcloud-fake")
 				So(event.NatName, ShouldEqual, "fake-"+service+"-vse2")
 				So(len(event.NatRules), ShouldEqual, 3)
-				Printf("\n        And it will forward port 22 to 10.1.0.12 ")
+				_, _ = Printf("\n        And it will forward port 22 to 10.1.0.12 ")
 				So(event.NatRules[2].Network, ShouldEqual, "NETWORK")
 				So(event.NatRules[2].TranslationIP, ShouldEqual, "10.1.0.12")
 				So(event.NatRules[2].TranslationPort, ShouldEqual, "22")
@@ -228,7 +247,7 @@ func TestPreVSE(t *testing.T) {
 				So(event.NatRules[2].Protocol, ShouldEqual, "tcp")
 			})
 
-			asub.Unsubscribe()
+			_ = asub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse4.yml definition", func() {
@@ -246,17 +265,19 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -272,9 +293,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid instance.update.vcloud-fake", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(iu.Cpus, ShouldEqual, 1)
 				So(len(iu.Disks), ShouldEqual, 0)
@@ -289,8 +312,8 @@ func TestPreVSE(t *testing.T) {
 				So(iu.RouterType, ShouldEqual, "")
 			})
 
-			icsub.Unsubscribe()
-			iusub.Unsubscribe()
+			_ = icsub.Unsubscribe()
+			_ = iusub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse5.yml definition", func() {
@@ -307,18 +330,20 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And I should receive a valid instance.update.vcloud-fake", " ", 8)
 				Info("And it will update cpu count on instance 1", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-web-1")
 				So(i.Cpus, ShouldEqual, 2)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -334,9 +359,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And it will update cpu count on instance 2", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(iu.Cpus, ShouldEqual, 2)
 				So(len(iu.Disks), ShouldEqual, 0)
@@ -351,7 +378,7 @@ func TestPreVSE(t *testing.T) {
 				So(iu.RouterType, ShouldEqual, "")
 			})
 
-			iusub.Unsubscribe()
+			_ = iusub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse6.yml definition", func() {
@@ -368,18 +395,20 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And I should receive a valid instance.update.vcloud-fake", " ", 8)
 				Info("And it will update disks on instance 1 ", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-web-1")
 				So(i.Cpus, ShouldEqual, 2)
 				So(len(i.Disks), ShouldEqual, 1)
@@ -397,9 +426,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And it will update disks on instance 2", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(iu.Cpus, ShouldEqual, 2)
 				So(len(iu.Disks), ShouldEqual, 1)
@@ -416,7 +447,7 @@ func TestPreVSE(t *testing.T) {
 				So(iu.RouterType, ShouldEqual, "")
 			})
 
-			iusub.Unsubscribe()
+			_ = iusub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse7.yml definition", func() {
@@ -433,18 +464,20 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And I should receive a valid instance.update.vcloud-fake", " ", 8)
 				Info("And it will update ram on instance 1 ", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-web-1")
 				So(i.Cpus, ShouldEqual, 2)
 				So(len(i.Disks), ShouldEqual, 1)
@@ -462,9 +495,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And it will update ram on instance 2 ", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(iu.Cpus, ShouldEqual, 2)
 				So(len(iu.Disks), ShouldEqual, 1)
@@ -481,7 +516,7 @@ func TestPreVSE(t *testing.T) {
 				So(iu.RouterType, ShouldEqual, "")
 			})
 
-			iusub.Unsubscribe()
+			_ = iusub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse8.yml definition", func() {
@@ -499,17 +534,19 @@ func TestPreVSE(t *testing.T) {
 				n := networkEvent{}
 				msg, err := waitMsg(nwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &n)
+				_ = json.Unmarshal(msg.Data, &n)
 				na := natEvent{}
 				msg, err = waitMsg(ntUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &na)
+				_ = json.Unmarshal(msg.Data, &na)
 
 				Info("And I should receive a valid network.create.vcloud-fake", " ", 8)
 				So(n.DatacenterName, ShouldEqual, "fake")
-				So(n.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(n.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(n.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(n.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(n.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(n.NetworkName, ShouldEqual, "fake-"+service+"-db")
 				So(n.NetworkGateway, ShouldEqual, "10.2.0.1")
 				So(n.NetworkNetmask, ShouldEqual, "255.255.255.0")
@@ -521,13 +558,15 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid nat.update.vcloud-fake", " ", 8)
 				So(na.DatacenterName, ShouldEqual, "fake")
-				So(na.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(na.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(na.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(na.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(na.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(na.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(na.NatName, ShouldEqual, "fake-"+service+"-vse2")
 				So(len(na.NatRules), ShouldEqual, 4)
-				Printf("\n        And it will create a snat for the new network ")
+				_, _ = Printf("\n        And it will create a snat for the new network ")
 				So(na.NatRules[1].Network, ShouldEqual, "NETWORK")
 				So(na.NatRules[1].OriginIP, ShouldEqual, "10.2.0.0/24")
 				So(na.NatRules[1].OriginPort, ShouldEqual, "any")
@@ -540,8 +579,8 @@ func TestPreVSE(t *testing.T) {
 				So(na.RouterType, ShouldEqual, "vcloud-fake")
 			})
 
-			nsub.Unsubscribe()
-			asub.Unsubscribe()
+			_ = nsub.Unsubscribe()
+			_ = asub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse9.yml definition", func() {
@@ -559,17 +598,19 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-db-1")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -585,9 +626,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid instance.update.vcloud-fake", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-db-1")
 				So(iu.Cpus, ShouldEqual, 1)
 				So(len(iu.Disks), ShouldEqual, 0)
@@ -602,8 +645,8 @@ func TestPreVSE(t *testing.T) {
 				So(iu.RouterType, ShouldEqual, "")
 			})
 
-			icsub.Unsubscribe()
-			iusub.Unsubscribe()
+			_ = icsub.Unsubscribe()
+			_ = iusub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse10.yml definition", func() {
@@ -620,13 +663,15 @@ func TestPreVSE(t *testing.T) {
 				event := instanceEvent{}
 				msg, err := waitMsg(inDeleteSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 
 				Info("And I should receive a valid instance.delete.vcloud-fake", " ", 8)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.InstanceName, ShouldEqual, "fake-"+service+"-web-2")
 				So(event.Cpus, ShouldEqual, 2)
 				So(len(event.Disks), ShouldEqual, 1)
@@ -643,7 +688,7 @@ func TestPreVSE(t *testing.T) {
 				So(event.RouterType, ShouldEqual, "")
 			})
 
-			isub.Unsubscribe()
+			_ = isub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse11.yml definition", func() {
@@ -660,13 +705,15 @@ func TestPreVSE(t *testing.T) {
 				event := instanceEvent{}
 				msg, err := waitMsg(inDeleteSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 
 				Info("And I should receive a valid instance.delete.vcloud-fake", " ", 8)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.InstanceName, ShouldEqual, "fake-"+service+"-db-1")
 				So(event.Cpus, ShouldEqual, 1)
 				So(len(event.Disks), ShouldEqual, 0)
@@ -681,7 +728,7 @@ func TestPreVSE(t *testing.T) {
 				So(event.RouterType, ShouldEqual, "")
 			})
 
-			isub.Unsubscribe()
+			_ = isub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse12.yml definition", func() {
@@ -703,42 +750,44 @@ func TestPreVSE(t *testing.T) {
 				n1 := networkEvent{}
 				msg, err := waitMsg(nwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &n1)
+				_ = json.Unmarshal(msg.Data, &n1)
 				n2 := networkEvent{}
 				msg, err = waitMsg(nwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &n2)
+				_ = json.Unmarshal(msg.Data, &n2)
 				i := instanceEvent{}
 				msg, err = waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				i2 := instanceEvent{}
 				msg, err = waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i2)
+				_ = json.Unmarshal(msg.Data, &i2)
 				f := firewallEvent{}
 				msg, err = waitMsg(fwCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &f)
+				_ = json.Unmarshal(msg.Data, &f)
 				na := natEvent{}
 				msg, err = waitMsg(ntCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &na)
+				_ = json.Unmarshal(msg.Data, &na)
 				ex := executionEvent{}
 				msg, err = waitMsg(boCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex)
+				_ = json.Unmarshal(msg.Data, &ex)
 				ex2 := executionEvent{}
 				msg, err = waitMsg(exCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex2)
+				_ = json.Unmarshal(msg.Data, &ex2)
 
 				Info("And I should receive a valid network.create.vcloud-fake", " ", 8)
 				Info("And it should create the salt master network", " ", 8)
 				So(n1.DatacenterName, ShouldEqual, "fake")
-				So(n1.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(n1.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(n1.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(n1.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(n1.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(n1.NetworkName, ShouldEqual, "fake-"+service2+"-salt")
 				So(n1.NetworkGateway, ShouldEqual, "10.254.254.1")
 				So(n1.NetworkNetmask, ShouldEqual, "255.255.255.0")
@@ -747,9 +796,11 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And it should create the user defined network", " ", 8)
 				So(n2.DatacenterName, ShouldEqual, "fake")
-				So(n2.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(n2.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(n2.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(n2.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(n2.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(n2.NetworkName, ShouldEqual, "fake-"+service2+"-web")
 				So(n2.NetworkGateway, ShouldEqual, "10.1.0.1")
 				So(n2.NetworkNetmask, ShouldEqual, "255.255.255.0")
@@ -759,10 +810,12 @@ func TestPreVSE(t *testing.T) {
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				Info("And it should create the salt master instance", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service2+"-salt-master")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -778,10 +831,12 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And it should create the user defined instance ", " ", 8)
 				So(i2.DatacenterName, ShouldEqual, "fake")
-				So(i2.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i2.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i2.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i2.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i2.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i2.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i2.InstanceName, ShouldEqual, "fake-"+service2+"-web-1")
 				So(i2.Cpus, ShouldEqual, 1)
 				So(len(i2.Disks), ShouldEqual, 0)
@@ -797,9 +852,32 @@ func TestPreVSE(t *testing.T) {
 
 				Info("Then I should receive a valid firewall.create.vcloud-fake", " ", 8)
 				So(f.DatacenterName, ShouldEqual, "fake")
-				So(f.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(f.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(f.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
+				So(i2.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
+				So(i2.DatacenterType, ShouldEqual, "vcloud-fake")
+				So(i2.InstanceName, ShouldEqual, "fake-"+service2+"-web-1")
+				So(i2.Cpus, ShouldEqual, 1)
+				So(len(i2.Disks), ShouldEqual, 0)
+				So(i2.IP, ShouldEqual, "10.1.0.11")
+				So(i2.Memory, ShouldEqual, 1024)
+				So(i2.ReferenceCatalog, ShouldEqual, "r3")
+				So(i2.ReferenceImage, ShouldEqual, "ubuntu-1404")
+				So(i2.InstanceType, ShouldEqual, "vcloud-fake")
+				So(i2.NetworkName, ShouldEqual, "fake-"+service2+"-web")
+				So(i2.RouterIP, ShouldEqual, "")
+				So(i2.RouterName, ShouldEqual, "")
+				So(i2.RouterType, ShouldEqual, "")
+
+				Info("Then I should receive a valid firewall.create.vcloud-fake", " ", 8)
+				So(f.DatacenterName, ShouldEqual, "fake")
+				encryptedPwd, _ = crypto.Decrypt(f.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(f.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(f.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(f.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(f.Type, ShouldEqual, "vcloud-fake")
 				So(f.RouterIP, ShouldEqual, "172.16.186.44")
 				So(f.RouterName, ShouldEqual, "vse2")
@@ -864,10 +942,12 @@ func TestPreVSE(t *testing.T) {
 
 				Info("And I should receive a valid nat.create.vcloud-fake", " ", 8)
 				So(na.DatacenterName, ShouldEqual, "fake")
-				So(na.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(na.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(na.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(na.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(na.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(na.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(na.NatName, ShouldEqual, "fake-"+service2+"-vse2")
 				So(len(na.NatRules), ShouldEqual, 4)
 
@@ -928,12 +1008,12 @@ func TestPreVSE(t *testing.T) {
 				So(ex2.ServiceOptions.Password, ShouldEqual, salt.Password)
 			})
 
-			nsub.Unsubscribe()
-			isub.Unsubscribe()
-			fsub.Unsubscribe()
-			asub.Unsubscribe()
-			esub.Unsubscribe()
-			bsub.Unsubscribe()
+			_ = nsub.Unsubscribe()
+			_ = isub.Unsubscribe()
+			_ = fsub.Unsubscribe()
+			_ = asub.Unsubscribe()
+			_ = esub.Unsubscribe()
+			_ = bsub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse13.yml definition", func() {
@@ -952,23 +1032,25 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				ex := executionEvent{}
 				msg, err = waitMsg(boCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex)
+				_ = json.Unmarshal(msg.Data, &ex)
 				ex2 := executionEvent{}
 				msg, err = waitMsg(exCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex2)
+				_ = json.Unmarshal(msg.Data, &ex2)
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				Info("And it should create the second user defined instance ", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service2+"-web-2")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -1000,9 +1082,9 @@ func TestPreVSE(t *testing.T) {
 				So(ex2.ServiceOptions.Password, ShouldEqual, salt.Password)
 			})
 
-			isub.Unsubscribe()
-			esub.Unsubscribe()
-			bsub.Unsubscribe()
+			_ = isub.Unsubscribe()
+			_ = esub.Unsubscribe()
+			_ = bsub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse14.yml definition", func() {
@@ -1019,7 +1101,7 @@ func TestPreVSE(t *testing.T) {
 				event := executionEvent{}
 				msg, err := waitMsg(exCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 
 				Info("And I should receive a valid execution.create.fake", " ", 8)
 				Info("And it will run the updated execution on both web nodes ", " ", 8)
@@ -1031,7 +1113,7 @@ func TestPreVSE(t *testing.T) {
 				So(event.ServiceOptions.Password, ShouldEqual, salt.Password)
 			})
 
-			esub.Unsubscribe()
+			_ = esub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse15.yml definition", func() {
@@ -1051,14 +1133,16 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 
 				Info("And it should create the third user defined instance ", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service2+"-db-1")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -1076,11 +1160,11 @@ func TestPreVSE(t *testing.T) {
 				ex := executionEvent{}
 				msg, err = waitMsg(boCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex)
+				_ = json.Unmarshal(msg.Data, &ex)
 				ex2 := executionEvent{}
 				msg, err = waitMsg(exCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex2)
+				_ = json.Unmarshal(msg.Data, &ex2)
 
 				Info("And it will bootstrap the db node ", " ", 8)
 				So(ex.Name, ShouldEqual, "Bootstrap fake-"+service2+"-db-1")
@@ -1089,7 +1173,7 @@ func TestPreVSE(t *testing.T) {
 				So(ex.ExecutionTarget, ShouldEqual, "list:salt-master.localdomain")
 				So(ex.ServiceOptions.User, ShouldEqual, salt.User)
 				So(ex.ServiceOptions.Password, ShouldEqual, salt.Password)
-				Printf("\n        And it will run the execution on the db node ")
+				_, _ = Printf("\n        And it will run the execution on the db node ")
 				So(ex2.Name, ShouldEqual, "Execution db 1")
 				So(ex2.ExecutionType, ShouldEqual, "fake")
 				So(ex2.ExecutionPayload, ShouldEqual, "date")
@@ -1098,9 +1182,9 @@ func TestPreVSE(t *testing.T) {
 				So(ex2.ServiceOptions.Password, ShouldEqual, salt.Password)
 			})
 
-			isub.Unsubscribe()
-			esub.Unsubscribe()
-			bsub.Unsubscribe()
+			_ = isub.Unsubscribe()
+			_ = esub.Unsubscribe()
+			_ = bsub.Unsubscribe()
 		})
 
 		Convey("When I apply a valid novse16.yml definition", func() {
@@ -1119,14 +1203,16 @@ func TestPreVSE(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inDeleteSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 
 				Info("And it should create the third user defined instance ", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service2+"-web-2")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -1144,7 +1230,7 @@ func TestPreVSE(t *testing.T) {
 				ex := executionEvent{}
 				msg, err = waitMsg(exCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &ex)
+				_ = json.Unmarshal(msg.Data, &ex)
 
 				Info("And it will remove web-2's key from the salt master ", " ", 8)
 				So(ex.Name, ShouldEqual, "Cleanup Bootstrap fake-"+service2+"-web-2")
@@ -1155,8 +1241,8 @@ func TestPreVSE(t *testing.T) {
 				So(ex.ServiceOptions.Password, ShouldEqual, salt.Password)
 			})
 
-			idsub.Unsubscribe()
-			esub.Unsubscribe()
+			_ = idsub.Unsubscribe()
+			_ = esub.Unsubscribe()
 		})
 	})
 }

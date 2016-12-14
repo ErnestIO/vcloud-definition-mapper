@@ -14,6 +14,7 @@ machine:
     ERNEST_LOG_FILE: '/tmp/ernest.log'
     ERNEST_APPLY_DELAY: 1
     ROOTPATH: /home/ubuntu/.go_workspace/src/github.com/ernestio/
+    ERNEST_CRYPTO_KEY: mMYlPIvI11z20H1BnBmB223355667788
 
   hosts:
     ernest.local: 127.0.0.1
@@ -31,7 +32,7 @@ dependencies:
     - mkdir /tmp/composable
     - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
     - sed -i "s:master:develop:g" /tmp/ernest/definition.yml
-    - composable gen -exclude='*-aws-connector,*-vcloud-connector,vcloud-definition-mapper' /tmp/ernest/definition.yml integration/template.yml --
+    - composable gen -E ERNEST_CRYPTO_KEY=$ERNEST_CRYPTO_KEY -exclude='*-aws-connector,*-vcloud-connector,vcloud-definition-mapper' /tmp/ernest/definition.yml integration/template.yml --
     - docker-compose -f docker-compose.yml up -d
     - docker-compose logs > /tmp/compose.log:
           background: true
