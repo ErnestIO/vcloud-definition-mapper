@@ -13,12 +13,19 @@ import (
 	"strings"
 	"testing"
 
+	aes "github.com/ernestio/crypto/aes"
 	"github.com/nats-io/nats"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestPatchService(t *testing.T) {
 	var service = "corn"
+	var encryptedPwd string
+	var encryptedUsr string
+
+	crypto := aes.New()
+	key := os.Getenv("ERNEST_CRYPTO_KEY")
+
 	type ServiceCreate struct {
 		ID string `json:"id"`
 	}
@@ -60,19 +67,21 @@ func TestPatchService(t *testing.T) {
 
 				msg, err := waitMsg(inCreateServiceSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &createEvent)
+				_ = json.Unmarshal(msg.Data, &createEvent)
 
 				event := instanceEvent{}
 				msg, err = waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.InstanceName, ShouldEqual, "fake-"+service+"-stg-1")
 				So(event.Cpus, ShouldEqual, 1)
 				So(len(event.Disks), ShouldEqual, 0)
@@ -87,13 +96,13 @@ func TestPatchService(t *testing.T) {
 				So(event.RouterType, ShouldEqual, "")
 			})
 
-			subIn.Unsubscribe()
-			sub.Unsubscribe()
+			_ = subIn.Unsubscribe()
+			_ = sub.Unsubscribe()
 
 		})
 
 		Convey("When this service is marked as errored", func() {
-			n.Publish("service.set", []byte(`{"id":"`+createEvent.ID+`","status":"errored"}`))
+			_ = n.Publish("service.set", []byte(`{"id":"`+createEvent.ID+`","status":"errored"}`))
 			Convey("And I re-apply the same service", func() {
 				sub, _ := n.ChanSubscribe("service.create", patchSub)
 				f := getDefinitionPath("inst1.yml", service)
@@ -101,7 +110,7 @@ func TestPatchService(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				msg, err := waitMsg(patchSub)
-				json.Unmarshal(msg.Data, &patchEvent)
+				_ = json.Unmarshal(msg.Data, &patchEvent)
 
 				Info("And I should receive an event to re-create the service", " ", 8)
 				So(patchEvent.ID, ShouldNotEqual, createEvent.ID)
@@ -109,7 +118,7 @@ func TestPatchService(t *testing.T) {
 
 				So(err, ShouldBeNil)
 
-				sub.Unsubscribe()
+				_ = sub.Unsubscribe()
 			})
 		})
 	})

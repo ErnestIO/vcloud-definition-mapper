@@ -161,7 +161,7 @@ type executionEvent struct {
 }
 
 type awsInstanceEvent struct {
-	Uuid                  string   `json:"_uuid"`
+	UUID                  string   `json:"_uuid"`
 	BatchID               string   `json:"_batch_id"`
 	Type                  string   `json:"_type"`
 	DatacenterRegion      string   `json:"datacenter_region,omitempty"`
@@ -179,7 +179,7 @@ type awsInstanceEvent struct {
 }
 
 type awsNetworkEvent struct {
-	Uuid                  string `json:"_uuid"`
+	UUID                  string `json:"_uuid"`
 	BatchID               string `json:"_batch_id"`
 	Type                  string `json:"_type"`
 	Service               string `json:"service"`
@@ -201,7 +201,7 @@ type awsFirewallRule struct {
 }
 
 type awsFirewallEvent struct {
-	Uuid                  string `json:"_uuid"`
+	UUID                  string `json:"_uuid"`
 	BatchID               string `json:"_batch_id"`
 	Type                  string `json:"_type"`
 	DatacenterRegion      string `json:"datacenter_region"`
@@ -219,7 +219,7 @@ type awsFirewallEvent struct {
 }
 
 type awsNatEvent struct {
-	Uuid                  string   `json:"_uuid"`
+	string                `json:"_uuid"`
 	BatchID               string   `json:"_batch_id"`
 	Type                  string   `json:"_type"`
 	DatacenterRegion      string   `json:"datacenter_region"`
@@ -244,7 +244,7 @@ type awsELBListener struct {
 }
 
 type awsELBEvent struct {
-	Uuid                string           `json:"_uuid"`
+	UUID                string           `json:"_uuid"`
 	BatchID             string           `json:"_batch_id"`
 	Type                string           `json:"_type"`
 	Name                string           `json:"name"`

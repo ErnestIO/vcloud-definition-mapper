@@ -8,15 +8,22 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"testing"
 
+	aes "github.com/ernestio/crypto/aes"
 	"github.com/nats-io/nats"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestStandAloneInstances(t *testing.T) {
 	var service = "inst"
+	var encryptedPwd string
+	var encryptedUsr string
+
+	crypto := aes.New()
+	key := os.Getenv("ERNEST_CRYPTO_KEY")
 
 	service = service + strconv.Itoa(rand.Intn(9999999))
 
@@ -39,14 +46,16 @@ func TestStandAloneInstances(t *testing.T) {
 				event := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 
 				Info("And I should receive a valid instance.create.vcloud-fake", " ", 8)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.InstanceName, ShouldEqual, "fake-"+service+"-stg-1")
 				So(event.Cpus, ShouldEqual, 1)
 				So(len(event.Disks), ShouldEqual, 0)
@@ -61,7 +70,7 @@ func TestStandAloneInstances(t *testing.T) {
 				So(event.RouterType, ShouldEqual, "")
 			})
 
-			sub.Unsubscribe()
+			_ = sub.Unsubscribe()
 		})
 
 		Convey("When I add an extra instance with inst2.yml definition", func() {
@@ -79,18 +88,20 @@ func TestStandAloneInstances(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And it will create stg-2 instance", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-stg-2")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -106,10 +117,12 @@ func TestStandAloneInstances(t *testing.T) {
 
 				Info("And it will update stg-2 instance", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-stg-2")
 				So(iu.Cpus, ShouldEqual, 1)
 				So(len(iu.Disks), ShouldEqual, 0)
@@ -125,8 +138,8 @@ func TestStandAloneInstances(t *testing.T) {
 
 			})
 
-			csub.Unsubscribe()
-			usub.Unsubscribe()
+			_ = csub.Unsubscribe()
+			_ = usub.Unsubscribe()
 		})
 		//time.Sleep(time.Second)
 
@@ -145,18 +158,20 @@ func TestStandAloneInstances(t *testing.T) {
 				i := instanceEvent{}
 				msg, err := waitMsg(inCreateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &i)
+				_ = json.Unmarshal(msg.Data, &i)
 				iu := instanceEvent{}
 				msg, err = waitMsg(inUpdateSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &iu)
+				_ = json.Unmarshal(msg.Data, &iu)
 
 				Info("And it will create dev-1 instance", " ", 8)
 				So(i.DatacenterName, ShouldEqual, "fake")
-				So(i.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(i.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(i.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(i.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(i.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(i.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(i.InstanceName, ShouldEqual, "fake-"+service+"-dev-1")
 				So(i.Cpus, ShouldEqual, 1)
 				So(len(i.Disks), ShouldEqual, 0)
@@ -172,10 +187,12 @@ func TestStandAloneInstances(t *testing.T) {
 
 				Info("And it will update dev-1 instance", " ", 8)
 				So(iu.DatacenterName, ShouldEqual, "fake")
-				So(iu.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(iu.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(iu.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(iu.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(iu.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(iu.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(iu.InstanceName, ShouldEqual, "fake-"+service+"-dev-1")
 				So(iu.Cpus, ShouldEqual, 1)
 				So(len(iu.Disks), ShouldEqual, 0)
@@ -189,8 +206,8 @@ func TestStandAloneInstances(t *testing.T) {
 				So(iu.RouterName, ShouldEqual, "")
 				So(iu.RouterType, ShouldEqual, "")
 			})
-			csub.Unsubscribe()
-			usub.Unsubscribe()
+			_ = csub.Unsubscribe()
+			_ = usub.Unsubscribe()
 		})
 
 		Convey("When I delete stg-2 from  inst4.yml definition", func() {
@@ -209,12 +226,14 @@ func TestStandAloneInstances(t *testing.T) {
 				event := instanceEvent{}
 				msg, err := waitMsg(inDeleteSub)
 				So(err, ShouldBeNil)
-				json.Unmarshal(msg.Data, &event)
+				_ = json.Unmarshal(msg.Data, &event)
 				So(event.DatacenterName, ShouldEqual, "fake")
-				So(event.DatacenterPassword, ShouldEqual, default_pwd)
+				encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+				encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+				So(defaultPwd, ShouldEqual, encryptedPwd)
+				So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 				So(event.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 				So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-				So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 				So(event.InstanceName, ShouldEqual, "fake-"+service+"-stg-2")
 				So(event.Cpus, ShouldEqual, 1)
 				So(len(event.Disks), ShouldEqual, 0)
@@ -229,7 +248,7 @@ func TestStandAloneInstances(t *testing.T) {
 				So(event.RouterType, ShouldEqual, "")
 			})
 
-			dsub.Unsubscribe()
+			_ = dsub.Unsubscribe()
 		})
 
 		Convey("When I delete stg-1 instance from  inst5.yml definition", func() {
@@ -247,14 +266,16 @@ func TestStandAloneInstances(t *testing.T) {
 			event := instanceEvent{}
 			msg, err := waitMsg(inDeleteSub)
 			So(err, ShouldBeNil)
-			json.Unmarshal(msg.Data, &event)
+			_ = json.Unmarshal(msg.Data, &event)
 
 			Info("And it will delete stg-2 instance", " ", 8)
 			So(event.DatacenterName, ShouldEqual, "fake")
-			So(event.DatacenterPassword, ShouldEqual, default_pwd)
+			encryptedPwd, _ = crypto.Decrypt(event.DatacenterPassword, key)
+			encryptedUsr, _ = crypto.Decrypt(event.DatacenterUsername, key)
+			So(defaultPwd, ShouldEqual, encryptedPwd)
+			So(defaultUsr+"@"+defaultOrg, ShouldEqual, encryptedUsr)
 			So(event.DatacenterRegion, ShouldEqual, "$(datacenters.items.0.region)")
 			So(event.DatacenterType, ShouldEqual, "vcloud-fake")
-			So(event.DatacenterUsername, ShouldEqual, default_usr+"@"+default_org)
 			So(event.InstanceName, ShouldEqual, "fake-"+service+"-stg-1")
 			So(event.Cpus, ShouldEqual, 1)
 			So(len(event.Disks), ShouldEqual, 0)
@@ -268,7 +289,7 @@ func TestStandAloneInstances(t *testing.T) {
 			So(event.RouterName, ShouldEqual, "")
 			So(event.RouterType, ShouldEqual, "")
 
-			dsub.Unsubscribe()
+			_ = dsub.Unsubscribe()
 		})
 
 	})
